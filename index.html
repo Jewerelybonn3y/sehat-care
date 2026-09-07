@@ -28,9 +28,9 @@
     <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 py-8">
 
-        <!-- HERO BANNER SLIDER IMAGE SECTION (SLIDING EFFECT) -->
+        <!-- HERO BANNER SLIDER IMAGE SECTION (Ukuran Asli Dipulihkan) -->
         <section class="mb-12 relative">
-            <div class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative min-h-[220px] md:min-h-[350px] bg-slate-200">
+            <div id="banner-slider-container" class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative min-h-[220px] md:min-h-[350px] bg-slate-200">
                 <!-- Wrapper Slider dengan Flexbox untuk efek geser -->
                 <div id="banner-slider-wrapper" class="flex transition-transform duration-700 ease-in-out h-full w-full">
                     <!-- Dinamis dari database -->
@@ -73,7 +73,7 @@
         </div>
     </main>
 
-    <!-- JavaScript Public (IndexedDB Integration & Sliding Animation) -->
+    <!-- JavaScript Public -->
     <script>
         const defaultServices = [
             { id: 1, nama: "Konsultasi Dokter Umum", harga: 100000, deskripsi: "Konsultasi kesehatan komprehensif langsung dengan dokter berpengalaman." },
@@ -92,7 +92,6 @@
         let currentSlide = 0;
         let slideInterval;
 
-        // Buka koneksi ke IndexedDB yang sama dengan admin
         const request = indexedDB.open("SehatCareDB", 1);
 
         request.onerror = function(event) {
@@ -173,11 +172,11 @@
             wrapper.innerHTML = '';
             dotsContainer.innerHTML = '';
 
-            // Masukkan elemen gambar banner ke dalam slider wrapper
             banners.forEach((b, index) => {
+                // Menggunakan object-cover dengan tinggi menyesuaikan container asli
                 wrapper.innerHTML += `
                     <div class="min-w-full h-full flex-shrink-0">
-                        <img src="${b.image}" class="w-full h-full object-cover min-h-[220px] md:min-h-[350px]" alt="Banner SehatCare">
+                        <img src="${b.image}" class="w-full h-full object-cover" alt="Banner SehatCare">
                     </div>
                 `;
 
@@ -187,14 +186,13 @@
                 `;
             });
 
-            // Geser posisi wrapper sesuai index banner saat ini
             wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
         }
 
         function setSlide(index) {
             currentSlide = index;
             renderSlider();
-            resetSliderOtomatis(); // Reset timer saat diklik manual
+            resetSliderOtomatis();
         }
 
         function mulaiSliderOtomatis() {
@@ -225,9 +223,7 @@
             const layanan = document.getElementById('layanan-pilihan').value;
             const notelp = document.getElementById('notelp').value;
             const alamat = document.getElementById('alamat').value;
-            
-            // Masukkan nomor WhatsApp admin Anda di sini (format internasional tanpa tanda +, contoh: 628123456789)
-            const nomorAdmin = "6281234567890"; 
+            const nomorAdmin = "6281234567890"; // Ganti dengan nomor WhatsApp admin Anda
             
             const pesan = `Halo Admin SehatCare, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Pilihan Layanan:* ${layanan}%0A*No Telepon:* ${notelp}%0A*Alamat Lengkap:* ${alamat}`;
             
