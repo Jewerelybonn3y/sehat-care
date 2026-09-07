@@ -6,7 +6,9 @@
     <title>SehatCare - Layanan Kesehatan Profesional</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
@@ -26,10 +28,13 @@
     <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 py-8">
 
-        <!-- HERO BANNER SLIDER IMAGE SECTION -->
+        <!-- HERO BANNER SLIDER IMAGE SECTION (SLIDING EFFECT) -->
         <section class="mb-12 relative">
-            <div id="banner-slider-container" class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative min-h-[220px] md:min-h-[350px] bg-slate-200 flex items-center justify-center">
-                <!-- Slide gambar dinamis -->
+            <div class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative min-h-[220px] md:min-h-[350px] bg-slate-200">
+                <!-- Wrapper Slider dengan Flexbox untuk efek geser -->
+                <div id="banner-slider-wrapper" class="flex transition-transform duration-700 ease-in-out h-full w-full">
+                    <!-- Dinamis dari database -->
+                </div>
             </div>
             <!-- Navigasi Slider Dot -->
             <div id="slider-dots" class="flex justify-center space-x-2 mt-4"></div>
@@ -57,6 +62,10 @@
                     <label class="block text-sm font-medium text-slate-700 mb-1">Nomor WhatsApp</label>
                     <input type="tel" id="notelp" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Contoh: 08123456789">
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Alamat Lengkap</label>
+                    <textarea id="alamat" required rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm" placeholder="Contoh: Jl. Merdeka No. 10, RT 01/RW 02, Kota..."></textarea>
+                </div>
                 <button type="submit" class="w-full py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-teal-600/30 transition cursor-pointer">
                     Pesan Sekarang via WhatsApp
                 </button>
@@ -64,7 +73,7 @@
         </div>
     </main>
 
-    <!-- JavaScript Public (IndexedDB Integration) -->
+    <!-- JavaScript Public (IndexedDB Integration & Sliding Animation) -->
     <script>
         const defaultServices = [
             { id: 1, nama: "Konsultasi Dokter Umum", harga: 100000, deskripsi: "Konsultasi kesehatan komprehensif langsung dengan dokter berpengalaman." },
@@ -81,13 +90,13 @@
         let services = [];
         let banners = [];
         let currentSlide = 0;
+        let slideInterval;
 
-        // Buka koneksi ke IndexedDB yang sama
+        // Buka koneksi ke IndexedDB yang sama dengan admin
         const request = indexedDB.open("SehatCareDB", 1);
 
         request.onerror = function(event) {
             console.error("Gagal membuka IndexedDB", event);
-            // Fallback ke data default jika gagal
             services = defaultServices;
             banners = defaultBanners;
             renderPublic();
@@ -158,17 +167,17 @@
         }
 
         function renderSlider() {
-            const container = document.getElementById('banner-slider-container');
+            const wrapper = document.getElementById('banner-slider-wrapper');
             const dotsContainer = document.getElementById('slider-dots');
             
-            container.innerHTML = '';
+            wrapper.innerHTML = '';
             dotsContainer.innerHTML = '';
 
+            // Masukkan elemen gambar banner ke dalam slider wrapper
             banners.forEach((b, index) => {
-                const activeClass = index === currentSlide ? 'block opacity-100' : 'hidden opacity-0';
-                container.innerHTML += `
-                    <div class="absolute inset-0 transition-opacity duration-700 ease-in-out ${activeClass}">
-                        <img src="${b.image}" class="w-full h-full object-cover" alt="Banner SehatCare">
+                wrapper.innerHTML += `
+                    <div class="min-w-full h-full flex-shrink-0">
+                        <img src="${b.image}" class="w-full h-full object-cover min-h-[220px] md:min-h-[350px]" alt="Banner SehatCare">
                     </div>
                 `;
 
@@ -177,20 +186,29 @@
                     <button onclick="setSlide(${index})" class="h-2 rounded-full transition-all duration-300 cursor-pointer ${dotActive}"></button>
                 `;
             });
+
+            // Geser posisi wrapper sesuai index banner saat ini
+            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
         }
 
         function setSlide(index) {
             currentSlide = index;
             renderSlider();
+            resetSliderOtomatis(); // Reset timer saat diklik manual
         }
 
         function mulaiSliderOtomatis() {
-            setInterval(() => {
+            slideInterval = setInterval(() => {
                 if (banners.length > 0) {
                     currentSlide = (currentSlide + 1) % banners.length;
                     renderSlider();
                 }
             }, 4000);
+        }
+
+        function resetSliderOtomatis() {
+            clearInterval(slideInterval);
+            mulaiSliderOtomatis();
         }
 
         function pilihCepat(nama) {
@@ -206,9 +224,13 @@
             const nama = document.getElementById('nama').value;
             const layanan = document.getElementById('layanan-pilihan').value;
             const notelp = document.getElementById('notelp').value;
+            const alamat = document.getElementById('alamat').value;
+            
+            // Masukkan nomor WhatsApp admin Anda di sini (format internasional tanpa tanda +, contoh: 628123456789)
             const nomorAdmin = "6281234567890"; 
             
-            const pesan = `Halo Admin SehatCare, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Pilihan Layanan:* ${layanan}%0A*No Telepon:* ${notelp}`;
+            const pesan = `Halo Admin SehatCare, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Pilihan Layanan:* ${layanan}%0A*No Telepon:* ${notelp}%0A*Alamat Lengkap:* ${alamat}`;
+            
             window.open(`https://wa.me/${nomorAdmin}?text=${pesan}`, '_blank');
         }
     </script>
