@@ -3,345 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - SehatCare</title>
+    <title>Panel Admin - SehatCare</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen p-4 md:p-8">
 
-    <!-- Navbar Admin -->
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">⚡</div>
-                <span class="text-xl font-bold text-slate-900">Panel Admin SehatCare</span>
+    <div class="max-w-4xl mx-auto space-y-8">
+        
+        <!-- Header Admin -->
+        <div class="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-teal-600/20">A</div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">Panel Admin SehatCare</h1>
+                    <p class="text-xs text-slate-400">Sinkronisasi Global Cloud Database</p>
+                </div>
             </div>
-            <a href="index.html" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-teal-50 text-teal-700 hover:bg-teal-100">
-                Lihat Website Utama ↗
+            <a href="index.html" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+                Lihat Website 🌐
             </a>
         </div>
-    </header>
 
-    <!-- Content Admin -->
-    <main class="max-w-6xl mx-auto px-4 py-8 space-y-12">
-
-        <!-- KELOLA TAMPILAN BACKGROUND / WALLPAPER -->
-        <section class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-100">
-            <div class="mb-6">
-                <h2 class="text-xl font-bold text-slate-900">Kelola Wallpaper & Latar Belakang Website</h2>
-                <p class="text-slate-500 text-sm">Pilih warna latar belakang polos atau upload gambar wallpaper kustom untuk halaman utama.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Opsi 1: Pilih Warna Solid -->
-                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
-                    <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wide">Pilih Warna Background</h3>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Warna Latar Belakang</label>
-                        <div class="flex gap-3 items-center">
-                            <input type="color" id="admin-bg-color" value="#f8fafc" class="w-12 h-12 rounded-xl border border-slate-200 cursor-pointer p-1 bg-white">
-                            <span class="text-xs text-slate-500">Klik kotak untuk memilih warna kesukaan Anda.</span>
-                        </div>
+        <!-- 1. Pengaturan Background Website -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Pengaturan Background Website</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Pilih Warna Solid</label>
+                    <div class="flex gap-2">
+                        <input type="color" id="bg-color-picker" class="w-12 h-10 rounded-xl border border-slate-200 cursor-pointer p-1 bg-white">
+                        <button onclick="simpanBackground('color')" class="px-4 py-2 bg-teal-600 text-white font-bold text-xs rounded-xl hover:bg-teal-700 transition cursor-pointer">Terapkan Warna</button>
                     </div>
-                    <button onclick="simpanWarnaBg()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-sm transition cursor-pointer">
-                        Terapkan Warna
-                    </button>
                 </div>
-
-                <!-- Opsi 2: Upload Wallpaper Gambar -->
-                <form onsubmit="simpanWallpaperGambar(event)" class="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
-                    <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wide">Upload Gambar Wallpaper Kustom</h3>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih File Gambar Wallpaper</label>
-                        <input type="file" id="wallpaper-file" accept="image/*" required class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 cursor-pointer">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Atau URL Gambar Background</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="bg-image-url" placeholder="https://..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <button onclick="simpanBackground('image')" class="px-4 py-2 bg-teal-600 text-white font-bold text-xs rounded-xl hover:bg-teal-700 transition cursor-pointer">Terapkan Gambar</button>
                     </div>
-                    <button type="submit" class="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl text-sm transition cursor-pointer">
-                        Upload & Pasang Wallpaper
-                    </button>
-                </form>
-            </div>
-        </section>
-
-        <!-- KELOLA UPLOAD BANNER SLIDER -->
-        <section class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-100">
-            <div class="mb-6">
-                <h2 class="text-xl font-bold text-slate-900">Kelola Banner Slider Beranda</h2>
-                <p class="text-slate-500 text-sm">Upload desain banner kustom Anda (Disarankan rasio lebar optimal 1200x350 piksel).</p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Form Upload Banner -->
-                <form onsubmit="tambahBannerGambar(event)" class="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100 h-fit">
-                    <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wide">Upload Gambar Banner</h3>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih File Gambar (JPG/PNG)</label>
-                        <input type="file" id="banner-file" accept="image/*" required class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 cursor-pointer">
-                    </div>
-                    <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-sm transition cursor-pointer">
-                        Upload & Tambah Slide
-                    </button>
-                </form>
-
-                <!-- Daftar Banner Aktif -->
-                <div class="lg:col-span-2 overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-100 text-slate-400 text-xs font-semibold uppercase">
-                                <th class="py-3 px-3">Pratinjau Banner</th>
-                                <th class="py-3 px-3">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-banner-table" class="divide-y divide-slate-100 text-sm align-middle">
-                            <!-- Dinamis -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- KELOLA LAYANAN & HARGA -->
-        <section class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-100">
-            <div class="mb-6">
-                <h2 class="text-xl font-bold text-slate-900">Kelola Layanan & Harga</h2>
-                <p class="text-slate-500 text-sm">Tambah atau perbarui jenis layanan kesehatan beserta tarif biayanya.</p>
+        <!-- 2. Pengaturan Banner Slider -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Kelola Banner Slider</h2>
+            <form onsubmit="tambahBanner(event)" class="flex gap-3 mb-4">
+                <input type="text" id="banner-url" placeholder="Masukkan URL Gambar Banner (https://...)" required class="flex-grow px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <button type="submit" class="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">Tambah Banner</button>
+            </form>
+            <div id="admin-banner-list" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <p class="text-slate-400 text-sm">Memuat banner...</p>
             </div>
+        </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Form Tambah Layanan -->
-                <form onsubmit="tambahLayanan(event)" class="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100 h-fit">
-                    <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wide">Tambah Layanan Baru</h3>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Tindakan/Layanan</label>
-                        <input type="text" id="admin-nama" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm" placeholder="Contoh: Infus Booster">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Harga (Rp)</label>
-                        <input type="number" id="admin-harga" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm" placeholder="Contoh: 250000">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi Singkat</label>
-                        <textarea id="admin-deskripsi" required rows="2" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm" placeholder="Deskripsi layanan..."></textarea>
-                    </div>
-                    <button type="submit" class="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl text-sm transition cursor-pointer">
-                        Simpan Layanan
-                    </button>
-                </form>
-
-                <!-- Daftar Layanan -->
-                <div class="lg:col-span-2 overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-100 text-slate-400 text-xs font-semibold uppercase">
-                                <th class="py-3 px-3">Layanan</th>
-                                <th class="py-3 px-3">Harga</th>
-                                <th class="py-3 px-3">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-services-table" class="divide-y divide-slate-100 text-sm">
-                            <!-- Dinamis -->
-                        </tbody>
-                    </table>
+        <!-- 3. Tambah Layanan Baru -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Tambah Layanan Kesehatan</h2>
+            <form onsubmit="tambahLayanan(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Layanan</label>
+                    <input type="text" id="admin-nama" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Contoh: USG Kehamilan">
                 </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Harga (Rupiah)</label>
+                    <input type="number" id="admin-harga" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Contoh: 200000">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Deskripsi Singkat</label>
+                    <textarea id="admin-deskripsi" rows="2" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Deskripsi singkat layanan..."></textarea>
+                </div>
+                <button type="submit" class="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-teal-600/20 transition cursor-pointer">
+                    Simpan Layanan ke Cloud
+                </button>
+            </form>
+        </div>
+
+        <!-- Daftar Layanan Aktif -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Daftar Layanan Aktif di Database</h2>
+            <div id="admin-services-list" class="space-y-3">
+                <p class="text-slate-400 text-sm">Memuat data layanan...</p>
             </div>
-        </section>
+        </div>
+    </div>
 
-    </main>
-
-    <!-- JavaScript Admin -->
+    <!-- JavaScript Admin Supabase -->
     <script>
-        const defaultServices = [
-            { id: 1, nama: "Konsultasi Dokter Umum", harga: 100000, deskripsi: "Konsultasi kesehatan komprehensif langsung dengan dokter berpengalaman." },
-            { id: 2, nama: "Suntik Vitamin C", harga: 150000, deskripsi: "Meningkatkan daya tahan tubuh dan kesegaran fisik secara instan." },
-            { id: 3, nama: "Sunat Modern (Cauter/Klamp)", harga: 1500000, deskripsi: "Prosedur sunat minim nyeri, cepat sembuh, dan ditangani tenaga medis ahli." }
-        ];
+        const SUPABASE_URL = "https://owliugdusdvcjuzfyelu.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_4FOxl1CSx0j1K1WkC7xNAA_8dl-M1eZ";
+        
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const defaultBanners = [
-            { id: 1, image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80" },
-            { id: 2, image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80" }
-        ];
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchAdminServices();
+            fetchAdminBanners();
+        });
 
-        let db;
-        const request = indexedDB.open("SehatCareDB", 1);
-
-        request.onerror = function(event) {
-            console.error("Gagal membuka IndexedDB", event);
-        };
-
-        request.onsuccess = function(event) {
-            db = event.target.result;
-            inisialisasiDataAwal();
-        };
-
-        request.onupgradeneeded = function(event) {
-            db = event.target.result;
-            if (!db.objectStoreNames.contains("services")) {
-                db.createObjectStore("services", { keyPath: "id" });
-            }
-            if (!db.objectStoreNames.contains("banners")) {
-                db.createObjectStore("banners", { keyPath: "id" });
-            }
-        };
-
-        function inisialisasiDataAwal() {
-            const transaction = db.transaction(["services", "banners"], "readwrite");
+        // --- MANAJEMEN LAYANAN ---
+        async function fetchAdminServices() {
+            const list = document.getElementById('admin-services-list');
+            const { data, error } = await _supabase.from('services').select('*');
             
-            const serviceStore = transaction.objectStore("services");
-            serviceStore.getAll().onsuccess = function(event) {
-                if (event.target.result.length === 0) {
-                    defaultServices.forEach(s => serviceStore.add(s));
-                }
-            };
+            if (error) {
+                list.innerHTML = `<p class="text-red-500 text-sm">Gagal memuat data: ${error.message}</p>`;
+                return;
+            }
 
-            const bannerStore = transaction.objectStore("banners");
-            bannerStore.getAll().onsuccess = function(event) {
-                if (event.target.result.length === 0) {
-                    defaultBanners.forEach(b => bannerStore.add(b));
-                }
-                renderAdmin();
-            };
+            list.innerHTML = data.length === 0 ? '<p class="text-slate-400 text-sm">Belum ada layanan.</p>' : '';
+            data.forEach(s => {
+                const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
+                list.innerHTML += `
+                    <div class="flex justify-between items-center p-4 rounded-2xl border border-slate-100 bg-slate-50">
+                        <div>
+                            <h3 class="font-bold text-slate-900">${s.nama} <span class="text-teal-600 font-semibold text-sm">(${formattedHarga})</span></h3>
+                            <p class="text-slate-500 text-xs">${s.deskripsi}</p>
+                        </div>
+                        <button onclick="hapusLayanan(${s.id})" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-lg transition cursor-pointer">Hapus</button>
+                    </div>
+                `;
+            });
         }
 
-        function renderAdmin() {
-            if (!db) return;
-
-            const sTransaction = db.transaction("services", "readonly");
-            sTransaction.objectStore("services").getAll().onsuccess = function(event) {
-                const services = event.target.result;
-                const sTable = document.getElementById('admin-services-table');
-                sTable.innerHTML = '';
-                services.forEach(s => {
-                    const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
-                    sTable.innerHTML += `
-                        <tr>
-                            <td class="py-3 px-3 font-semibold text-slate-900">${s.nama}<br><span class="text-xs text-slate-400 font-normal">${s.deskripsi}</span></td>
-                            <td class="py-3 px-3 text-teal-600 font-bold">${formattedHarga}</td>
-                            <td class="py-3 px-3">
-                                <button onclick="hapusLayanan(${s.id})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold bg-rose-50 px-2.5 py-1.5 rounded-lg transition cursor-pointer">Hapus</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            };
-
-            const bTransaction = db.transaction("banners", "readonly");
-            bTransaction.objectStore("banners").getAll().onsuccess = function(event) {
-                const banners = event.target.result;
-                const bTable = document.getElementById('admin-banner-table');
-                bTable.innerHTML = '';
-                banners.forEach(b => {
-                    bTable.innerHTML += `
-                        <tr>
-                            <td class="py-3 px-3">
-                                <img src="${b.image}" class="w-32 h-16 object-cover rounded-xl border border-slate-200 shadow-sm" alt="Banner Preview">
-                            </td>
-                            <td class="py-3 px-3">
-                                <button onclick="hapusBanner(${b.id})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold bg-rose-50 px-2.5 py-1.5 rounded-lg transition cursor-pointer">Hapus</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            };
-        }
-
-        function tambahLayanan(e) {
+        async function tambahLayanan(e) {
             e.preventDefault();
             const nama = document.getElementById('admin-nama').value;
-            const harga = Number(document.getElementById('admin-harga').value);
+            const harga = parseFloat(document.getElementById('admin-harga').value);
             const deskripsi = document.getElementById('admin-deskripsi').value;
 
-            const transaction = db.transaction(["services"], "readwrite");
-            transaction.objectStore("services").add({ id: Date.now(), nama, harga, deskripsi });
-
-            transaction.oncomplete = function() {
-                renderAdmin();
-                e.target.reset();
-                alert('Layanan berhasil ditambahkan!');
-            };
-        }
-
-        function hapusLayanan(id) {
-            if (confirm('Hapus layanan ini?')) {
-                const transaction = db.transaction(["services"], "readwrite");
-                transaction.objectStore("services").delete(id);
-
-                transaction.oncomplete = function() {
-                    renderAdmin();
-                };
+            const { error } = await _supabase.from('services').insert([{ nama, harga, deskripsi }]);
+            if (error) {
+                alert("Gagal menyimpan: " + error.message);
+            } else {
+                alert("Layanan berhasil disimpan ke Supabase!");
+                document.getElementById('admin-nama').value = '';
+                document.getElementById('admin-harga').value = '';
+                document.getElementById('admin-deskripsi').value = '';
+                fetchAdminServices();
             }
         }
 
-        function tambahBannerGambar(e) {
-            e.preventDefault();
-            const formElement = e.target;
-            const fileInput = document.getElementById('banner-file');
-            const file = fileInput.files[0];
-            
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const base64Image = event.target.result;
-                    
-                    const transaction = db.transaction(["banners"], "readwrite");
-                    transaction.objectStore("banners").add({ id: Date.now(), image: base64Image });
-
-                    transaction.oncomplete = function() {
-                        renderAdmin();
-                        formElement.reset();
-                        alert('Banner gambar berhasil diunggah!');
-                    };
-                };
-                reader.readAsDataURL(file);
+        async function hapusLayanan(id) {
+            if (confirm("Yakin ingin menghapus layanan ini?")) {
+                const { error } = await _supabase.from('services').delete().eq('id', id);
+                if (error) alert("Gagal menghapus: " + error.message);
+                else fetchAdminServices();
             }
         }
 
-        function hapusBanner(id) {
-            const bTransaction = db.transaction("banners", "readonly");
-            bTransaction.objectStore("banners").getAll().onsuccess = function(event) {
-                const banners = event.target.result;
-                if(banners.length <= 1) {
-                    alert('Minimal harus ada 1 banner aktif!');
-                    return;
-                }
-                if (confirm('Hapus banner slide ini?')) {
-                    const transaction = db.transaction(["banners"], "readwrite");
-                    transaction.objectStore("banners").delete(id);
+        // --- MANAJEMEN BANNER ---
+        async function fetchAdminBanners() {
+            const list = document.getElementById('admin-banner-list');
+            const { data, error } = await _supabase.from('banners').select('*');
+            if (error) return;
 
-                    transaction.oncomplete = function() {
-                        renderAdmin();
-                    };
-                }
-            };
+            list.innerHTML = data.length === 0 ? '<p class="text-slate-400 text-sm col-span-3">Belum ada banner.</p>' : '';
+            data.forEach(b => {
+                list.innerHTML += `
+                    <div class="relative rounded-2xl overflow-hidden border border-slate-200 h-28 bg-slate-100 group">
+                        <img src="${b.image}" class="w-full h-full object-cover">
+                        <button onclick="hapusBanner(${b.id})" class="absolute inset-0 bg-red-900/60 text-white font-bold text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer">Hapus Banner</button>
+                    </div>
+                `;
+            });
         }
 
-        // Pengaturan Background / Wallpaper menggunakan localStorage agar instan
-        function simpanWarnaBg() {
-            const warna = document.getElementById('admin-bg-color').value;
-            localStorage.setItem('sehatcare_bg_type', 'color');
-            localStorage.setItem('sehatcare_bg_value', warna);
-            alert('Warna background berhasil diterapkan ke website utama!');
-        }
-
-        function simpanWallpaperGambar(e) {
+        async function tambahBanner(e) {
             e.preventDefault();
-            const formElement = e.target;
-            const fileInput = document.getElementById('wallpaper-file');
-            const file = fileInput.files[0];
+            const image = document.getElementById('banner-url').value;
+            const { error } = await _supabase.from('banners').insert([{ image }]);
+            if (error) alert("Gagal: " + error.message);
+            else {
+                document.getElementById('banner-url').value = '';
+                fetchAdminBanners();
+            }
+        }
+
+        async function hapusBanner(id) {
+            if (confirm("Hapus banner ini?")) {
+                await _supabase.from('banners').delete().eq('id', id);
+                fetchAdminBanners();
+            }
+        }
+
+        // --- MANAJEMEN BACKGROUND ---
+        async function simpanBackground(type) {
+            let value = type === 'color' ? document.getElementById('bg-color-picker').value : document.getElementById('bg-image-url').value;
             
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const base64Image = event.target.result;
-                    try {
-                        localStorage.setItem('sehatcare_bg_type', 'image');
-                        localStorage.setItem('sehatcare_bg_value', base64Image);
-                        alert('Wallpaper berhasil dipasang ke website utama!');
-                        formElement.reset();
-                    } catch (error) {
-                        alert('Ukuran gambar terlalu besar.');
-                    }
-                };
-                reader.readAsDataURL(file);
+            // Simpan atau perbarui data setting background di Supabase
+            const { error } = await _supabase.from('settings').upsert({ key: 'website_bg', type, value });
+            if (error) {
+                alert("Gagal menyimpan background: " + error.message);
+            } else {
+                alert("Background berhasil diperbarui untuk seluruh user di dunia!");
             }
         }
     </script>
