@@ -30,7 +30,7 @@
         <section class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-100">
             <div class="mb-6">
                 <h2 class="text-xl font-bold text-slate-900">Kelola Banner Slider Beranda</h2>
-                <p class="text-slate-500 text-sm">Upload desain banner kustom Anda (Disarankan rasio lebar optimal misal 1200x500 piksel).</p>
+                <p class="text-slate-500 text-sm">Upload desain banner kustom Anda (Penyimpanan menggunakan IndexedDB).</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -111,7 +111,7 @@
 
     </main>
 
-    <!-- JavaScript Admin -->
+    <!-- JavaScript Admin (IndexedDB) -->
     <script>
         const defaultServices = [
             { id: 1, nama: "Konsultasi Dokter Umum", harga: 100000, deskripsi: "Konsultasi kesehatan komprehensif langsung dengan dokter berpengalaman." },
@@ -124,41 +124,94 @@
             { id: 2, image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80" }
         ];
 
-        let services = JSON.parse(localStorage.getItem('health_services')) || defaultServices;
-        let banners = JSON.parse(localStorage.getItem('health_banners')) || defaultBanners;
+        let db;
+
+        // Inisialisasi Database IndexedDB
+        const request = indexedDB.open("SehatCareDB", 1);
+
+        request.onerror = function(event) {
+            console.error("Gagal membuka IndexedDB", event);
+        };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            inisialisasiDataAwal();
+        };
+
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains("services")) {
+                db.createObjectStore("services", { keyPath: "id" });
+            }
+            if (!db.objectStoreNames.contains("banners")) {
+                db.createObjectStore("banners", { keyPath: "id" });
+            }
+        };
+
+        // Memasukkan data default jika database masih kosong
+        function inisialisasiDataAwal() {
+            const transaction = db.transaction(["services", "banners"], "readwrite");
+            
+            const serviceStore = transaction.objectStore("services");
+            serviceStore.getAll().onsuccess = function(event) {
+                if (event.target.result.length === 0) {
+                    defaultServices.forEach(s => serviceStore.add(s));
+                }
+            };
+
+            const bannerStore = transaction.objectStore("banners");
+            bannerStore.getAll().onsuccess = function(event) {
+                if (event.target.result.length === 0) {
+                    defaultBanners.forEach(b => bannerStore.add(b));
+                }
+                renderAdmin();
+            };
+        }
 
         function renderAdmin() {
-            // Render Service Table
-            const sTable = document.getElementById('admin-services-table');
-            sTable.innerHTML = '';
-            services.forEach(s => {
-                const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
-                sTable.innerHTML += `
-                    <tr>
-                        <td class="py-3 px-3 font-semibold text-slate-900">${s.nama}<br><span class="text-xs text-slate-400 font-normal">${s.deskripsi}</span></td>
-                        <td class="py-3 px-3 text-teal-600 font-bold">${formattedHarga}</td>
-                        <td class="py-3 px-3">
-                            <button onclick="hapusLayanan(${s.id})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold bg-rose-50 px-2.5 py-1.5 rounded-lg transition cursor-pointer">Hapus</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            if (!db) return;
 
-            // Render Banner Table
-            const bTable = document.getElementById('admin-banner-table');
-            bTable.innerHTML = '';
-            banners.forEach(b => {
-                bTable.innerHTML += `
-                    <tr>
-                        <td class="py-3 px-3">
-                            <img src="${b.image}" class="w-32 h-16 object-cover rounded-xl border border-slate-200 shadow-sm" alt="Banner Preview">
-                        </td>
-                        <td class="py-3 px-3">
-                            <button onclick="hapusBanner(${b.id})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold bg-rose-50 px-2.5 py-1.5 rounded-lg transition cursor-pointer">Hapus</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            // Render Services
+            const sTransaction = db.transaction("services", "readonly");
+            const sStore = sTransaction.objectStore("services");
+            sStore.getAll().onsuccess = function(event) {
+                const services = event.target.result;
+                const sTable = document.getElementById('admin-services-table');
+                sTable.innerHTML = '';
+                services.forEach(s => {
+                    const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
+                    sTable.innerHTML += `
+                        <tr>
+                            <td class="py-3 px-3 font-semibold text-slate-900">${s.nama}<br><span class="text-xs text-slate-400 font-normal">${s.deskripsi}</span></td>
+                            <td class="py-3 px-3 text-teal-600 font-bold">${formattedHarga}</td>
+                            <td class="py-3 px-3">
+                                <button onclick="hapusLayanan(${s.id})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold bg-rose-50 px-2.5 py-1.5 rounded-lg transition cursor-pointer">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            };
+
+            // Render Banners
+            const bTransaction = db.transaction("banners", "readonly");
+            const bStore = bTransaction.objectStore("banners");
+            bStore.getAll().onsuccess = function(event) {
+                const banners = event.target.result;
+                const bTable = document.getElementById('admin-banner-table');
+                bTable.innerHTML = '';
+                banners.forEach(b => {
+                    bTable.innerHTML += `
+                        <tr>
+                            <td class="py-3 px-3">
+                                <img src="${b.image}" class="w-32 h-16 object-cover rounded-xl border border-slate-200 shadow-sm" alt="Banner Preview">
+                            </td>
+                            <td class="py-3 px-3">
+                                <button onclick="hapusBanner(${b.id})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold bg-rose-50 px-2.5 py-1.5 rounded-lg transition cursor-pointer">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            };
         }
 
         function tambahLayanan(e) {
@@ -167,23 +220,32 @@
             const harga = Number(document.getElementById('admin-harga').value);
             const deskripsi = document.getElementById('admin-deskripsi').value;
 
-            services.push({ id: Date.now(), nama, harga, deskripsi });
-            localStorage.setItem('health_services', JSON.stringify(services));
-            renderAdmin();
-            e.target.reset();
-            alert('Layanan berhasil ditambahkan!');
+            const transaction = db.transaction(["services"], "readwrite");
+            const store = transaction.objectStore("services");
+            store.add({ id: Date.now(), nama, harga, deskripsi });
+
+            transaction.oncomplete = function() {
+                renderAdmin();
+                e.target.reset();
+                alert('Layanan berhasil ditambahkan!');
+            };
         }
 
         function hapusLayanan(id) {
             if (confirm('Hapus layanan ini?')) {
-                services = services.filter(s => s.id !== id);
-                localStorage.setItem('health_services', JSON.stringify(services));
-                renderAdmin();
+                const transaction = db.transaction(["services"], "readwrite");
+                const store = transaction.objectStore("services");
+                store.delete(id);
+
+                transaction.oncomplete = function() {
+                    renderAdmin();
+                };
             }
         }
 
         function tambahBannerGambar(e) {
             e.preventDefault();
+            const formElement = e.target;
             const fileInput = document.getElementById('banner-file');
             const file = fileInput.files[0];
             
@@ -191,29 +253,45 @@
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const base64Image = event.target.result;
-                    banners.push({ id: Date.now(), image: base64Image });
-                    localStorage.setItem('health_banners', JSON.stringify(banners));
-                    renderAdmin();
-                    e.target.reset();
-                    alert('Banner gambar berhasil diunggah!');
+                    
+                    const transaction = db.transaction(["banners"], "readwrite");
+                    const store = transaction.objectStore("banners");
+                    store.add({ id: Date.now(), image: base64Image });
+
+                    transaction.oncomplete = function() {
+                        renderAdmin();
+                        formElement.reset();
+                        alert('Banner gambar berhasil diunggah dan disimpan di IndexedDB!');
+                    };
+                    
+                    transaction.onerror = function() {
+                        alert('Gagal menyimpan gambar ke IndexedDB.');
+                    };
                 };
                 reader.readAsDataURL(file);
             }
         }
 
         function hapusBanner(id) {
-            if(banners.length <= 1) {
-                alert('Minimal harus ada 1 banner aktif!');
-                return;
-            }
-            if (confirm('Hapus banner slide ini?')) {
-                banners = banners.filter(b => b.id !== id);
-                localStorage.setItem('health_banners', JSON.stringify(banners));
-                renderAdmin();
-            }
-        }
+            const bTransaction = db.transaction("banners", "readonly");
+            const bStore = bTransaction.objectStore("banners");
+            bStore.getAll().onsuccess = function(event) {
+                const banners = event.target.result;
+                if(banners.length <= 1) {
+                    alert('Minimal harus ada 1 banner aktif!');
+                    return;
+                }
+                if (confirm('Hapus banner slide ini?')) {
+                    const transaction = db.transaction(["banners"], "readwrite");
+                    const store = transaction.objectStore("banners");
+                    store.delete(id);
 
-        renderAdmin();
+                    transaction.oncomplete = function() {
+                        renderAdmin();
+                    };
+                }
+            };
+        }
     </script>
 </body>
 </html>
