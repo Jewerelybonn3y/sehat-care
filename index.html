@@ -28,9 +28,9 @@
     <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 py-8">
 
-        <!-- HERO BANNER SLIDER IMAGE SECTION (Ukuran Asli Dipulihkan) -->
+        <!-- HERO BANNER SLIDER IMAGE SECTION (Ukuran Dikunci 1200x350) -->
         <section class="mb-12 relative">
-            <div id="banner-slider-container" class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative min-h-[220px] md:min-h-[350px] bg-slate-200">
+            <div class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative h-[250px] md:h-[350px] bg-slate-200">
                 <!-- Wrapper Slider dengan Flexbox untuk efek geser -->
                 <div id="banner-slider-wrapper" class="flex transition-transform duration-700 ease-in-out h-full w-full">
                     <!-- Dinamis dari database -->
@@ -173,7 +173,6 @@
             dotsContainer.innerHTML = '';
 
             banners.forEach((b, index) => {
-                // Menggunakan object-cover dengan tinggi menyesuaikan container asli
                 wrapper.innerHTML += `
                     <div class="min-w-full h-full flex-shrink-0">
                         <img src="${b.image}" class="w-full h-full object-cover" alt="Banner SehatCare">
@@ -223,7 +222,7 @@
             const layanan = document.getElementById('layanan-pilihan').value;
             const notelp = document.getElementById('notelp').value;
             const alamat = document.getElementById('alamat').value;
-            const nomorAdmin = "6281234567890"; // Ganti dengan nomor WhatsApp admin Anda
+            const nomorAdmin = "6281234567890"; // Jangan lupa ganti dengan nomor WA admin Anda
             
             const pesan = `Halo Admin SehatCare, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Pilihan Layanan:* ${layanan}%0A*No Telepon:* ${notelp}%0A*Alamat Lengkap:* ${alamat}`;
             
