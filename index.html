@@ -64,7 +64,7 @@
         </div>
     </main>
 
-    <!-- JavaScript Public -->
+    <!-- JavaScript Public (IndexedDB Integration) -->
     <script>
         const defaultServices = [
             { id: 1, nama: "Konsultasi Dokter Umum", harga: 100000, deskripsi: "Konsultasi kesehatan komprehensif langsung dengan dokter berpengalaman." },
@@ -72,15 +72,62 @@
             { id: 3, nama: "Sunat Modern (Cauter/Klamp)", harga: 1500000, deskripsi: "Prosedur sunat minim nyeri, cepat sembuh, dan ditangani tenaga medis ahli." }
         ];
 
-        // Default banner menggunakan placeholder gambar estetis jika belum ada upload
         const defaultBanners = [
             { id: 1, image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80" },
             { id: 2, image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80" }
         ];
 
-        let services = JSON.parse(localStorage.getItem('health_services')) || defaultServices;
-        let banners = JSON.parse(localStorage.getItem('health_banners')) || defaultBanners;
+        let db;
+        let services = [];
+        let banners = [];
         let currentSlide = 0;
+
+        // Buka koneksi ke IndexedDB yang sama
+        const request = indexedDB.open("SehatCareDB", 1);
+
+        request.onerror = function(event) {
+            console.error("Gagal membuka IndexedDB", event);
+            // Fallback ke data default jika gagal
+            services = defaultServices;
+            banners = defaultBanners;
+            renderPublic();
+        };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            ambilDataDariDB();
+        };
+
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains("services")) {
+                db.createObjectStore("services", { keyPath: "id" });
+            }
+            if (!db.objectStoreNames.contains("banners")) {
+                db.createObjectStore("banners", { keyPath: "id" });
+            }
+        };
+
+        function ambilDataDariDB() {
+            const sTransaction = db.transaction("services", "readonly");
+            const sStore = sTransaction.objectStore("services");
+            
+            sStore.getAll().onsuccess = function(event) {
+                const hasilServices = event.target.result;
+                services = hasilServices.length > 0 ? hasilServices : defaultServices;
+
+                const bTransaction = db.transaction("banners", "readonly");
+                const bStore = bTransaction.objectStore("banners");
+                
+                bStore.getAll().onsuccess = function(e) {
+                    const hasilBanners = e.target.result;
+                    banners = hasilBanners.length > 0 ? hasilBanners : defaultBanners;
+
+                    renderPublic();
+                    mulaiSliderOtomatis();
+                };
+            };
+        }
 
         function renderPublic() {
             const grid = document.getElementById('public-services-grid');
@@ -137,13 +184,18 @@
             renderSlider();
         }
 
-        setInterval(() => {
-            currentSlide = (currentSlide + 1) % banners.length;
-            renderSlider();
-        }, 4000);
+        function mulaiSliderOtomatis() {
+            setInterval(() => {
+                if (banners.length > 0) {
+                    currentSlide = (currentSlide + 1) % banners.length;
+                    renderSlider();
+                }
+            }, 4000);
+        }
 
         function pilihCepat(nama) {
             const s = services.find(item => item.nama === nama);
+            if (!s) return;
             const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
             document.getElementById('layanan-pilihan').value = `${s.nama} - ${formattedHarga}`;
             window.scrollTo({ top: document.getElementById('booking-form').offsetTop - 100, behavior: 'smooth' });
@@ -159,8 +211,6 @@
             const pesan = `Halo Admin SehatCare, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Pilihan Layanan:* ${layanan}%0A*No Telepon:* ${notelp}`;
             window.open(`https://wa.me/${nomorAdmin}?text=${pesan}`, '_blank');
         }
-
-        renderPublic();
     </script>
 </body>
 </html>
