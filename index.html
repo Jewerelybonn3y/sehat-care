@@ -28,11 +28,11 @@
     <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 py-8">
 
-        <!-- HERO BANNER SLIDER IMAGE SECTION -->
+        <!-- HERO BANNER SLIDER IMAGE SECTION (Ukuran 1200x350 & Sliding Effect) -->
         <section class="mb-12 relative">
             <div class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative h-[250px] md:h-[350px] bg-slate-200">
                 <div id="banner-slider-wrapper" class="flex transition-transform duration-700 ease-in-out h-full w-full">
-                    <!-- Dinamis dari database -->
+                    <!-- Dinamis -->
                 </div>
             </div>
             <!-- Navigasi Slider Dot -->
@@ -91,6 +91,9 @@
         let currentSlide = 0;
         let slideInterval;
 
+        // Langsung terapkan background saat halaman dibuka
+        terapkanBackground();
+
         const request = indexedDB.open("SehatCareDB", 1);
 
         request.onerror = function(event) {
@@ -103,14 +106,12 @@
         request.onsuccess = function(event) {
             db = event.target.result;
             ambilDataDariDB();
-            terapkanBackground();
         };
 
         request.onupgradeneeded = function(event) {
             db = event.target.result;
             if (!db.objectStoreNames.contains("services")) db.createObjectStore("services", { keyPath: "id" });
             if (!db.objectStoreNames.contains("banners")) db.createObjectStore("banners", { keyPath: "id" });
-            if (!db.objectStoreNames.contains("settings")) db.createObjectStore("settings", { keyPath: "key" });
         };
 
         function ambilDataDariDB() {
@@ -130,26 +131,22 @@
             };
         }
 
-        // Fungsi membaca setting background dari IndexedDB
         function terapkanBackground() {
-            const transaction = db.transaction("settings", "readonly");
-            const store = transaction.objectStore("settings");
-            store.get("website_bg").onsuccess = function(event) {
-                const bgSetting = event.target.result;
-                const body = document.getElementById('page-body');
-                
-                if (bgSetting) {
-                    if (bgSetting.type === "color") {
-                        body.style.backgroundColor = bgSetting.value;
-                        body.style.backgroundImage = "none";
-                    } else if (bgSetting.type === "image") {
-                        body.style.backgroundImage = `url('${bgSetting.value}')`;
-                        body.style.backgroundSize = "cover";
-                        body.style.backgroundPosition = "center";
-                        body.style.backgroundAttachment = "fixed";
-                    }
+            const bgType = localStorage.getItem('sehatcare_bg_type');
+            const bgValue = localStorage.getItem('sehatcare_bg_value');
+            const body = document.getElementById('page-body');
+            
+            if (bgType && bgValue) {
+                if (bgType === "color") {
+                    body.style.backgroundColor = bgValue;
+                    body.style.backgroundImage = "none";
+                } else if (bgType === "image") {
+                    body.style.backgroundImage = `url('${bgValue}')`;
+                    body.style.backgroundSize = "cover";
+                    body.style.backgroundPosition = "center";
+                    body.style.backgroundAttachment = "fixed";
                 }
-            };
+            }
         }
 
         function renderPublic() {
@@ -237,7 +234,7 @@
             const layanan = document.getElementById('layanan-pilihan').value;
             const notelp = document.getElementById('notelp').value;
             const alamat = document.getElementById('alamat').value;
-            const nomorAdmin = "6281234567890"; 
+            const nomorAdmin = "6281234567890"; // Ganti dengan nomor WhatsApp Anda
             
             const pesan = `Halo Admin SehatCare, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Pilihan Layanan:* ${layanan}%0A*No Telepon:* ${notelp}%0A*Alamat Lengkap:* ${alamat}`;
             

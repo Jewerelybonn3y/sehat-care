@@ -148,7 +148,7 @@
 
     </main>
 
-    <!-- JavaScript Admin (IndexedDB) -->
+    <!-- JavaScript Admin -->
     <script>
         const defaultServices = [
             { id: 1, nama: "Konsultasi Dokter Umum", harga: 100000, deskripsi: "Konsultasi kesehatan komprehensif langsung dengan dokter berpengalaman." },
@@ -162,7 +162,6 @@
         ];
 
         let db;
-
         const request = indexedDB.open("SehatCareDB", 1);
 
         request.onerror = function(event) {
@@ -181,9 +180,6 @@
             }
             if (!db.objectStoreNames.contains("banners")) {
                 db.createObjectStore("banners", { keyPath: "id" });
-            }
-            if (!db.objectStoreNames.contains("settings")) {
-                db.createObjectStore("settings", { keyPath: "key" });
             }
         };
 
@@ -209,7 +205,6 @@
         function renderAdmin() {
             if (!db) return;
 
-            // Render Services
             const sTransaction = db.transaction("services", "readonly");
             sTransaction.objectStore("services").getAll().onsuccess = function(event) {
                 const services = event.target.result;
@@ -229,7 +224,6 @@
                 });
             };
 
-            // Render Banners
             const bTransaction = db.transaction("banners", "readonly");
             bTransaction.objectStore("banners").getAll().onsuccess = function(event) {
                 const banners = event.target.result;
@@ -320,14 +314,12 @@
             };
         }
 
+        // Pengaturan Background / Wallpaper menggunakan localStorage agar instan
         function simpanWarnaBg() {
             const warna = document.getElementById('admin-bg-color').value;
-            const transaction = db.transaction(["settings"], "readwrite");
-            transaction.objectStore("settings").put({ key: "website_bg", type: "color", value: warna });
-
-            transaction.oncomplete = function() {
-                alert('Warna background berhasil diterapkan ke website utama!');
-            };
+            localStorage.setItem('sehatcare_bg_type', 'color');
+            localStorage.setItem('sehatcare_bg_value', warna);
+            alert('Warna background berhasil diterapkan ke website utama!');
         }
 
         function simpanWallpaperGambar(e) {
@@ -340,14 +332,14 @@
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const base64Image = event.target.result;
-                    
-                    const transaction = db.transaction(["settings"], "readwrite");
-                    transaction.objectStore("settings").put({ key: "website_bg", type: "image", value: base64Image });
-
-                    transaction.oncomplete = function() {
+                    try {
+                        localStorage.setItem('sehatcare_bg_type', 'image');
+                        localStorage.setItem('sehatcare_bg_value', base64Image);
                         alert('Wallpaper berhasil dipasang ke website utama!');
                         formElement.reset();
-                    };
+                    } catch (error) {
+                        alert('Ukuran gambar terlalu besar.');
+                    }
                 };
                 reader.readAsDataURL(file);
             }
