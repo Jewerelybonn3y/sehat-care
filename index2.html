@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SehatCare - Layanan Kesehatan Profesional</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-teal-600/20">S</div>
+                <span class="text-xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">SehatCare</span>
+            </div>
+            <a href="admin.html" class="px-4 py-2 rounded-xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100 flex items-center gap-2">
+                <span>🔐</span> Login Admin
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+
+        <!-- HERO BANNER SLIDER SECTION -->
+        <section class="mb-12 relative">
+            <div id="banner-slider-container" class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative min-h-[280px] flex items-center">
+                <!-- Slide dinamis akan dimuat lewat JavaScript -->
+            </div>
+            <!-- Navigasi Slider Dot -->
+            <div id="slider-dots" class="flex justify-center space-x-2 mt-4">
+                <!-- Dots dinamis -->
+            </div>
+        </section>
+
+        <!-- Daftar Layanan -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Pilih Layanan Kesehatan</h2>
+            <div id="public-services-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Dinamis via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Form Pemesanan -->
+        <div class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-100 max-w-2xl mx-auto">
+            <h3 class="text-xl font-bold text-slate-900 mb-4">Formulir Pemesanan Cepat</h3>
+            <form id="booking-form" onsubmit="KirimKeWhatsApp(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="nama" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Contoh: Budi Santoso">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Pilih Layanan</label>
+                    <select id="layanan-pilihan" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                        <!-- Dinamis -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nomor WhatsApp</label>
+                    <input type="tel" id="notelp" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Contoh: 08123456789">
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-teal-600/30 transition cursor-pointer">
+                    Pesan Sekarang via WhatsApp
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- JavaScript Public -->
+    <script>
+        const defaultServices = [
+            { id: 1, nama: "Konsultasi Dokter Umum", harga: 100000, deskripsi: "Konsultasi kesehatan komprehensif langsung dengan dokter berpengalaman." },
+            { id: 2, nama: "Suntik Vitamin C", harga: 150000, deskripsi: "Meningkatkan daya tahan tubuh dan kesegaran fisik secara instan." },
+            { id: 3, nama: "Sunat Modern (Cauter/Klamp)", harga: 1500000, deskripsi: "Prosedur sunat minim nyeri, cepat sembuh, dan ditangani tenaga medis ahli." }
+        ];
+
+        const defaultBanners = [
+            { id: 1, title: "Layanan Kesehatan Profesional ke Rumah Anda", subtitle: "Konsultasi dokter, suntik vitamin, hingga sunat modern ditangani oleh tenaga medis berpengalaman secara aman dan nyaman.", gradient: "from-teal-600 to-emerald-600" },
+            { id: 2, title: "Promo Khusus Sunat Modern Bulan Ini", subtitle: "Dapatkan layanan sunat minim nyeri dengan teknologi terbaru langsung di rumah Anda.", gradient: "from-blue-600 to-indigo-600" }
+        ];
+
+        let services = JSON.parse(localStorage.getItem('health_services')) || defaultServices;
+        let banners = JSON.parse(localStorage.getItem('health_banners')) || defaultBanners;
+        let currentSlide = 0;
+
+        function renderPublic() {
+            // Render Services
+            const grid = document.getElementById('public-services-grid');
+            const select = document.getElementById('layanan-pilihan');
+            grid.innerHTML = '';
+            select.innerHTML = '';
+
+            services.forEach(s => {
+                const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
+                grid.innerHTML += `
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-lg shadow-slate-100 flex flex-col justify-between hover:border-teal-200 transition">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-1">${s.nama}</h3>
+                            <p class="text-slate-500 text-sm mb-4">${s.deskripsi}</p>
+                        </div>
+                        <div>
+                            <span class="text-xl font-extrabold text-teal-600 block mb-4">${formattedHarga}</span>
+                            <button onclick="pilihCepat('${s.nama}')" class="w-full py-2.5 bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold rounded-xl text-sm transition cursor-pointer">
+                                Pilih Layanan Ini
+                            </button>
+                        </div>
+                    </div>
+                `;
+                select.innerHTML += `<option value="${s.nama} - ${formattedHarga}">${s.nama} (${formattedHarga})</option>`;
+            });
+
+            renderSlider();
+        }
+
+        function renderSlider() {
+            const container = document.getElementById('banner-slider-container');
+            const dotsContainer = document.getElementById('slider-dots');
+            
+            container.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            banners.forEach((b, index) => {
+                // Active class untuk slide aktif
+                const activeClass = index === currentSlide ? 'block opacity-100' : 'hidden opacity-0';
+                container.innerHTML += `
+                    <div class="absolute inset-0 transition-opacity duration-700 ease-in-out bg-gradient-to-r ${b.gradient} text-white p-8 md:p-12 flex flex-col justify-center text-center rounded-3xl shadow-lg ${activeClass}">
+                        <h1 class="text-2xl md:text-4xl font-extrabold mb-3">${b.title}</h1>
+                        <p class="text-white/90 max-w-2xl mx-auto text-sm md:text-base">${b.subtitle}</p>
+                    </div>
+                `;
+
+                // Dots indicator
+                const dotActive = index === currentSlide ? 'bg-teal-600 w-6' : 'bg-slate-300 w-2';
+                dotsContainer.innerHTML += `
+                    <button onclick="setSlide(${index})" class="h-2 rounded-full transition-all duration-300 cursor-pointer ${dotActive}"></button>
+                `;
+            });
+        }
+
+        function setSlide(index) {
+            currentSlide = index;
+            renderSlider();
+        }
+
+        // Auto Slide setiap 4 detik
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % banners.length;
+            renderSlider();
+        }, 4000);
+
+        function pilihCepat(nama) {
+            document.getElementById('layanan-pilihan').value = services.find(s => s.nama === nama).nama + ' - ' + new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(services.find(s => s.nama === nama).harga);
+            window.scrollTo({ top: document.getElementById('booking-form').offsetTop - 100, behavior: 'smooth' });
+        }
+
+        function KirimKeWhatsApp(event) {
+            event.preventDefault();
+            const nama = document.getElementById('nama').value;
+            const layanan = document.getElementById('layanan-pilihan').value;
+            const notelp = document.getElementById('notelp').value;
+            const nomorAdmin = "6281234567890"; // Ganti nomor WhatsApp Anda di sini
+            
+            const pesan = `Halo Admin SehatCare, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Pilihan Layanan:* ${layanan}%0A*No Telepon:* ${notelp}`;
+            window.open(`https://wa.me/${nomorAdmin}?text=${pesan}`, '_blank');
+        }
+
+        renderPublic();
+    </script>
+</body>
+</html>
