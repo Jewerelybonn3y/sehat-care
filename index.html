@@ -12,7 +12,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body id="page-body" class="bg-slate-50 text-slate-800 antialiased transition-colors duration-500 min-h-screen flex flex-col justify-between">
+<body id="page-body" class="bg-slate-50 text-slate-800 antialiased transition-colors duration-500">
 
     <!-- Navbar -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
@@ -21,15 +21,16 @@
                 <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-teal-600/20">S</div>
                 <span class="text-xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">SehatCare</span>
             </div>
+            <!-- Tombol Login Admin sengaja disembunyikan agar hanya dapat diakses melalui URL khusus oleh Admin -->
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
+    <main class="max-w-6xl mx-auto px-4 py-8">
 
-        <!-- HERO BANNER SLIDER IMAGE SECTION (Adaptif HP & Laptop) -->
+        <!-- HERO BANNER SLIDER IMAGE SECTION (Ukuran 1200x350 & Sliding Effect) -->
         <section class="mb-12 relative">
-            <div class="overflow-hidden rounded-2xl md:rounded-3xl shadow-xl shadow-teal-900/10 relative aspect-[16/9] sm:aspect-[2/1] md:h-[350px] bg-slate-200">
+            <div class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative h-[250px] md:h-[350px] bg-slate-200">
                 <div id="banner-slider-wrapper" class="flex transition-transform duration-700 ease-in-out h-full w-full">
                     <!-- Dinamis -->
                 </div>
@@ -70,11 +71,6 @@
             </form>
         </div>
     </main>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400 mt-12">
-        &copy; 2026 SehatCare. Seluruh hak cipta dilindungi.
-    </footer>
 
     <!-- JavaScript Public -->
     <script>
@@ -201,7 +197,7 @@
             banners.forEach((b, index) => {
                 wrapper.innerHTML += `
                     <div class="min-w-full h-full flex-shrink-0">
-                        <img src="${b.image}" class="w-full h-full object-cover object-center" alt="Banner SehatCare">
+                        <img src="${b.image}" class="w-full h-full object-cover" alt="Banner SehatCare">
                     </div>
                 `;
 
