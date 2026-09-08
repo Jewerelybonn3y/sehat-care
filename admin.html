@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - SehatCare</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
 </head>
@@ -45,7 +48,7 @@
                         </div>
                     </div>
                     <button onclick="simpanWarnaBg()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-sm transition cursor-pointer">
-                        Terapkan Warna
+                        Terapkan Warna (Global)
                     </button>
                 </div>
 
@@ -57,7 +60,7 @@
                         <input type="file" id="wallpaper-file" accept="image/*" required class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 cursor-pointer">
                     </div>
                     <button type="submit" class="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl text-sm transition cursor-pointer">
-                        Upload & Pasang Wallpaper
+                        Upload & Pasang Wallpaper (Global)
                     </button>
                 </form>
             </div>
@@ -148,68 +151,29 @@
 
     </main>
 
-    <!-- JavaScript Admin -->
+    <!-- JavaScript Admin Supabase -->
     <script>
-        const defaultServices = [
-            { id: 1, nama: "Konsultasi Dokter Umum", harga: 100000, deskripsi: "Konsultasi kesehatan komprehensif langsung dengan dokter berpengalaman." },
-            { id: 2, nama: "Suntik Vitamin C", harga: 150000, deskripsi: "Meningkatkan daya tahan tubuh dan kesegaran fisik secara instan." },
-            { id: 3, nama: "Sunat Modern (Cauter/Klamp)", harga: 1500000, deskripsi: "Prosedur sunat minim nyeri, cepat sembuh, dan ditangani tenaga medis ahli." }
-        ];
+        const SUPABASE_URL = "https://owliugdusdvcjuzfyelu.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_4FOxl1CSx0j1K1WkC7xNAA_8dl-M1eZ";
 
-        const defaultBanners = [
-            { id: 1, image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80" },
-            { id: 2, image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80" }
-        ];
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let db;
-        const request = indexedDB.open("SehatCareDB", 1);
+        document.addEventListener("DOMContentLoaded", () => {
+            renderAdmin();
+        });
 
-        request.onerror = function(event) {
-            console.error("Gagal membuka IndexedDB", event);
-        };
-
-        request.onsuccess = function(event) {
-            db = event.target.result;
-            inisialisasiDataAwal();
-        };
-
-        request.onupgradeneeded = function(event) {
-            db = event.target.result;
-            if (!db.objectStoreNames.contains("services")) {
-                db.createObjectStore("services", { keyPath: "id" });
-            }
-            if (!db.objectStoreNames.contains("banners")) {
-                db.createObjectStore("banners", { keyPath: "id" });
-            }
-        };
-
-        function inisialisasiDataAwal() {
-            const transaction = db.transaction(["services", "banners"], "readwrite");
+        async function renderAdmin() {
+            // 1. Ambil & Render Layanan dari Supabase
+            const sTable = document.getElementById('admin-services-table');
+            sTable.innerHTML = '<tr><td colspan="3" class="py-4 text-slate-400 text-center">Memuat layanan...</td></tr>';
             
-            const serviceStore = transaction.objectStore("services");
-            serviceStore.getAll().onsuccess = function(event) {
-                if (event.target.result.length === 0) {
-                    defaultServices.forEach(s => serviceStore.add(s));
-                }
-            };
-
-            const bannerStore = transaction.objectStore("banners");
-            bannerStore.getAll().onsuccess = function(event) {
-                if (event.target.result.length === 0) {
-                    defaultBanners.forEach(b => bannerStore.add(b));
-                }
-                renderAdmin();
-            };
-        }
-
-        function renderAdmin() {
-            if (!db) return;
-
-            const sTransaction = db.transaction("services", "readonly");
-            sTransaction.objectStore("services").getAll().onsuccess = function(event) {
-                const services = event.target.result;
-                const sTable = document.getElementById('admin-services-table');
+            const { data: services, error: errS } = await _supabase.from('services').select('*');
+            if (!errS && services) {
                 sTable.innerHTML = '';
+                if (services.length === 0) {
+                    sTable.innerHTML = '<tr><td colspan="3" class="py-4 text-slate-400 text-center">Belum ada layanan.</td></tr>';
+                }
                 services.forEach(s => {
                     const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
                     sTable.innerHTML += `
@@ -222,13 +186,18 @@
                         </tr>
                     `;
                 });
-            };
+            }
 
-            const bTransaction = db.transaction("banners", "readonly");
-            bTransaction.objectStore("banners").getAll().onsuccess = function(event) {
-                const banners = event.target.result;
-                const bTable = document.getElementById('admin-banner-table');
+            // 2. Ambil & Render Banner dari Supabase
+            const bTable = document.getElementById('admin-banner-table');
+            bTable.innerHTML = '<tr><td colspan="2" class="py-4 text-slate-400 text-center">Memuat banner...</td></tr>';
+
+            const { data: banners, error: errB } = await _supabase.from('banners').select('*');
+            if (!errB && banners) {
                 bTable.innerHTML = '';
+                if (banners.length === 0) {
+                    bTable.innerHTML = '<tr><td colspan="2" class="py-4 text-slate-400 text-center">Belum ada banner.</td></tr>';
+                }
                 banners.forEach(b => {
                     bTable.innerHTML += `
                         <tr>
@@ -241,37 +210,36 @@
                         </tr>
                     `;
                 });
-            };
+            }
         }
 
-        function tambahLayanan(e) {
+        // --- TAMBAH & HAPUS LAYANAN ---
+        async function tambahLayanan(e) {
             e.preventDefault();
             const nama = document.getElementById('admin-nama').value;
             const harga = Number(document.getElementById('admin-harga').value);
             const deskripsi = document.getElementById('admin-deskripsi').value;
 
-            const transaction = db.transaction(["services"], "readwrite");
-            transaction.objectStore("services").add({ id: Date.now(), nama, harga, deskripsi });
-
-            transaction.oncomplete = function() {
+            const { error } = await _supabase.from('services').insert([{ nama, harga, deskripsi }]);
+            if (error) {
+                alert('Gagal menyimpan layanan: ' + error.message);
+            } else {
                 renderAdmin();
                 e.target.reset();
-                alert('Layanan berhasil ditambahkan!');
-            };
-        }
-
-        function hapusLayanan(id) {
-            if (confirm('Hapus layanan ini?')) {
-                const transaction = db.transaction(["services"], "readwrite");
-                transaction.objectStore("services").delete(id);
-
-                transaction.oncomplete = function() {
-                    renderAdmin();
-                };
+                alert('Layanan berhasil disimpan ke Cloud Database!');
             }
         }
 
-        function tambahBannerGambar(e) {
+        async function hapusLayanan(id) {
+            if (confirm('Hapus layanan ini?')) {
+                const { error } = await _supabase.from('services').delete().eq('id', id);
+                if (error) alert('Gagal menghapus: ' + error.message);
+                else renderAdmin();
+            }
+        }
+
+        // --- TAMBAH & HAPUS BANNER ---
+        async function tambahBannerGambar(e) {
             e.preventDefault();
             const formElement = e.target;
             const fileInput = document.getElementById('banner-file');
@@ -279,50 +247,45 @@
             
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
+                reader.onload = async function(event) {
                     const base64Image = event.target.result;
+                    const { error } = await _supabase.from('banners').insert([{ image: base64Image }]);
                     
-                    const transaction = db.transaction(["banners"], "readwrite");
-                    transaction.objectStore("banners").add({ id: Date.now(), image: base64Image });
-
-                    transaction.oncomplete = function() {
+                    if (error) {
+                        alert('Gagal mengunggah banner: ' + error.message);
+                    } else {
                         renderAdmin();
                         formElement.reset();
-                        alert('Banner gambar berhasil diunggah!');
-                    };
+                        alert('Banner berhasil diunggah ke Cloud Database!');
+                    }
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        function hapusBanner(id) {
-            const bTransaction = db.transaction("banners", "readonly");
-            bTransaction.objectStore("banners").getAll().onsuccess = function(event) {
-                const banners = event.target.result;
-                if(banners.length <= 1) {
-                    alert('Minimal harus ada 1 banner aktif!');
-                    return;
-                }
-                if (confirm('Hapus banner slide ini?')) {
-                    const transaction = db.transaction(["banners"], "readwrite");
-                    transaction.objectStore("banners").delete(id);
-
-                    transaction.oncomplete = function() {
-                        renderAdmin();
-                    };
-                }
-            };
+        async function hapusBanner(id) {
+            const { data: banners } = await _supabase.from('banners').select('*');
+            if (banners && banners.length <= 1) {
+                alert('Minimal harus ada 1 banner aktif!');
+                return;
+            }
+            if (confirm('Hapus banner slide ini?')) {
+                const { error } = await _supabase.from('banners').delete().eq('id', id);
+                if (error) alert('Gagal menghapus: ' + error.message);
+                else renderAdmin();
+            }
         }
 
-        // Pengaturan Background / Wallpaper menggunakan localStorage agar instan
-        function simpanWarnaBg() {
+        // --- PENGATURAN BACKGROUND / WALLPAPER ---
+        async function simpanWarnaBg() {
             const warna = document.getElementById('admin-bg-color').value;
-            localStorage.setItem('sehatcare_bg_type', 'color');
-            localStorage.setItem('sehatcare_bg_value', warna);
-            alert('Warna background berhasil diterapkan ke website utama!');
+            const { error } = await _supabase.from('settings').upsert({ key: 'website_bg', type: 'color', value: warna });
+            
+            if (error) alert('Gagal menyimpan warna: ' + error.message);
+            else alert('Warna background berhasil diterapkan ke seluruh user sedunia!');
         }
 
-        function simpanWallpaperGambar(e) {
+        async function simpanWallpaperGambar(e) {
             e.preventDefault();
             const formElement = e.target;
             const fileInput = document.getElementById('wallpaper-file');
@@ -330,15 +293,15 @@
             
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
+                reader.onload = async function(event) {
                     const base64Image = event.target.result;
-                    try {
-                        localStorage.setItem('sehatcare_bg_type', 'image');
-                        localStorage.setItem('sehatcare_bg_value', base64Image);
-                        alert('Wallpaper berhasil dipasang ke website utama!');
+                    const { error } = await _supabase.from('settings').upsert({ key: 'website_bg', type: 'image', value: base64Image });
+                    
+                    if (error) {
+                        alert('Gagal memasang wallpaper (ukuran file mungkin terlalu besar).');
+                    } else {
+                        alert('Wallpaper berhasil dipasang ke seluruh user sedunia!');
                         formElement.reset();
-                    } catch (error) {
-                        alert('Ukuran gambar terlalu besar.');
                     }
                 };
                 reader.readAsDataURL(file);
