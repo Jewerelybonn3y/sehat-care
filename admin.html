@@ -3,99 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - SehatCare</title>
+    <title>Admin Panel - SehatCare</title>
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen p-4 md:p-8">
+<body class="bg-slate-100 text-slate-800 min-h-screen p-6">
 
-    <div class="max-w-4xl mx-auto space-y-8">
-        
+    <div class="max-w-4xl mx-auto">
         <!-- Header Admin -->
-        <div class="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-teal-600/20">A</div>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-900">Panel Admin SehatCare</h1>
-                    <p class="text-xs text-slate-400">Sinkronisasi Global Cloud Database</p>
-                </div>
+        <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900">Panel Admin SehatCare</h1>
+                <p class="text-xs text-slate-400">Kelola data layanan yang tersinkronisasi global</p>
             </div>
-            <a href="index.html" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
-                Lihat Website 🌐
-            </a>
+            <a href="index.html" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Lihat Website</a>
         </div>
 
-        <!-- 1. Pengaturan Background Website -->
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-            <h2 class="text-lg font-bold text-slate-900 mb-4">Pengaturan Background Website</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Pilih Warna Solid</label>
-                    <div class="flex gap-2">
-                        <input type="color" id="bg-color-picker" class="w-12 h-10 rounded-xl border border-slate-200 cursor-pointer p-1 bg-white">
-                        <button onclick="simpanBackground('color')" class="px-4 py-2 bg-teal-600 text-white font-bold text-xs rounded-xl hover:bg-teal-700 transition cursor-pointer">Terapkan Warna</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Atau URL Gambar Background</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="bg-image-url" placeholder="https://..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-                        <button onclick="simpanBackground('image')" class="px-4 py-2 bg-teal-600 text-white font-bold text-xs rounded-xl hover:bg-teal-700 transition cursor-pointer">Terapkan Gambar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2. Pengaturan Banner Slider -->
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-            <h2 class="text-lg font-bold text-slate-900 mb-4">Kelola Banner Slider</h2>
-            <form onsubmit="tambahBanner(event)" class="flex gap-3 mb-4">
-                <input type="text" id="banner-url" placeholder="Masukkan URL Gambar Banner (https://...)" required class="flex-grow px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-                <button type="submit" class="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">Tambah Banner</button>
-            </form>
-            <div id="admin-banner-list" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <p class="text-slate-400 text-sm">Memuat banner...</p>
-            </div>
-        </div>
-
-        <!-- 3. Tambah Layanan Baru -->
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-            <h2 class="text-lg font-bold text-slate-900 mb-4">Tambah Layanan Kesehatan</h2>
+        <!-- Form Tambah Layanan -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-8">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Tambah Layanan Baru</h2>
             <form onsubmit="tambahLayanan(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Layanan</label>
-                    <input type="text" id="admin-nama" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Contoh: USG Kehamilan">
+                    <input type="text" id="admin-nama" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Harga (Rupiah)</label>
-                    <input type="number" id="admin-harga" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Contoh: 200000">
+                    <input type="number" id="admin-harga" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Deskripsi Singkat</label>
-                    <textarea id="admin-deskripsi" rows="2" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Deskripsi singkat layanan..."></textarea>
+                    <textarea id="admin-deskripsi" rows="2" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
                 </div>
-                <button type="submit" class="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-teal-600/20 transition cursor-pointer">
-                    Simpan Layanan ke Cloud
+                <button type="submit" class="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-sm shadow-md transition">
+                    Simpan ke Cloud Supabase
                 </button>
             </form>
         </div>
 
-        <!-- Daftar Layanan Aktif -->
+        <!-- Daftar Layanan Tersimpan -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-            <h2 class="text-lg font-bold text-slate-900 mb-4">Daftar Layanan Aktif di Database</h2>
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Daftar Layanan Aktif</h2>
             <div id="admin-services-list" class="space-y-3">
-                <p class="text-slate-400 text-sm">Memuat data layanan...</p>
+                <p class="text-slate-400 text-sm">Memuat data...</p>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript Admin Supabase -->
+    <!-- Skrip Admin Supabase -->
     <script>
         const SUPABASE_URL = "https://owliugdusdvcjuzfyelu.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_4FOxl1CSx0j1K1WkC7xNAA_8dl-M1eZ";
@@ -103,47 +60,51 @@
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        document.addEventListener("DOMContentLoaded", () => {
-            fetchAdminServices();
-            fetchAdminBanners();
-        });
+        document.addEventListener("DOMContentLoaded", fetchAdminServices);
 
-        // --- MANAJEMEN LAYANAN ---
         async function fetchAdminServices() {
-            const list = document.getElementById('admin-services-list');
+            const listContainer = document.getElementById('admin-services-list');
             const { data, error } = await _supabase.from('services').select('*');
             
             if (error) {
-                list.innerHTML = `<p class="text-red-500 text-sm">Gagal memuat data: ${error.message}</p>`;
+                listContainer.innerHTML = `<p class="text-red-500 text-sm">Gagal memuat data: ${error.message}</p>`;
                 return;
             }
 
-            list.innerHTML = data.length === 0 ? '<p class="text-slate-400 text-sm">Belum ada layanan.</p>' : '';
+            listContainer.innerHTML = '';
+            if (data.length === 0) {
+                listContainer.innerHTML = `<p class="text-slate-400 text-sm">Belum ada layanan yang ditambahkan.</p>";`;
+                return;
+            }
+
             data.forEach(s => {
                 const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
-                list.innerHTML += `
+                listContainer.innerHTML += `
                     <div class="flex justify-between items-center p-4 rounded-2xl border border-slate-100 bg-slate-50">
                         <div>
                             <h3 class="font-bold text-slate-900">${s.nama} <span class="text-teal-600 font-semibold text-sm">(${formattedHarga})</span></h3>
                             <p class="text-slate-500 text-xs">${s.deskripsi}</p>
                         </div>
-                        <button onclick="hapusLayanan(${s.id})" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-lg transition cursor-pointer">Hapus</button>
+                        <button onclick="hapusLayanan(${s.id})" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-lg transition">
+                            Hapus
+                        </button>
                     </div>
                 `;
             });
         }
 
-        async function tambahLayanan(e) {
-            e.preventDefault();
+        async function tambahLayanan(event) {
+            event.preventDefault();
             const nama = document.getElementById('admin-nama').value;
             const harga = parseFloat(document.getElementById('admin-harga').value);
             const deskripsi = document.getElementById('admin-deskripsi').value;
 
             const { error } = await _supabase.from('services').insert([{ nama, harga, deskripsi }]);
+            
             if (error) {
                 alert("Gagal menyimpan: " + error.message);
             } else {
-                alert("Layanan berhasil disimpan ke Supabase!");
+                alert("Layanan berhasil ditambahkan ke cloud database!");
                 document.getElementById('admin-nama').value = '';
                 document.getElementById('admin-harga').value = '';
                 document.getElementById('admin-deskripsi').value = '';
@@ -154,56 +115,11 @@
         async function hapusLayanan(id) {
             if (confirm("Yakin ingin menghapus layanan ini?")) {
                 const { error } = await _supabase.from('services').delete().eq('id', id);
-                if (error) alert("Gagal menghapus: " + error.message);
-                else fetchAdminServices();
-            }
-        }
-
-        // --- MANAJEMEN BANNER ---
-        async function fetchAdminBanners() {
-            const list = document.getElementById('admin-banner-list');
-            const { data, error } = await _supabase.from('banners').select('*');
-            if (error) return;
-
-            list.innerHTML = data.length === 0 ? '<p class="text-slate-400 text-sm col-span-3">Belum ada banner.</p>' : '';
-            data.forEach(b => {
-                list.innerHTML += `
-                    <div class="relative rounded-2xl overflow-hidden border border-slate-200 h-28 bg-slate-100 group">
-                        <img src="${b.image}" class="w-full h-full object-cover">
-                        <button onclick="hapusBanner(${b.id})" class="absolute inset-0 bg-red-900/60 text-white font-bold text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer">Hapus Banner</button>
-                    </div>
-                `;
-            });
-        }
-
-        async function tambahBanner(e) {
-            e.preventDefault();
-            const image = document.getElementById('banner-url').value;
-            const { error } = await _supabase.from('banners').insert([{ image }]);
-            if (error) alert("Gagal: " + error.message);
-            else {
-                document.getElementById('banner-url').value = '';
-                fetchAdminBanners();
-            }
-        }
-
-        async function hapusBanner(id) {
-            if (confirm("Hapus banner ini?")) {
-                await _supabase.from('banners').delete().eq('id', id);
-                fetchAdminBanners();
-            }
-        }
-
-        // --- MANAJEMEN BACKGROUND ---
-        async function simpanBackground(type) {
-            let value = type === 'color' ? document.getElementById('bg-color-picker').value : document.getElementById('bg-image-url').value;
-            
-            // Simpan atau perbarui data setting background di Supabase
-            const { error } = await _supabase.from('settings').upsert({ key: 'website_bg', type, value });
-            if (error) {
-                alert("Gagal menyimpan background: " + error.message);
-            } else {
-                alert("Background berhasil diperbarui untuk seluruh user di dunia!");
+                if (error) {
+                    alert("Gagal menghapus: " + error.message);
+                } else {
+                    fetchAdminServices();
+                }
             }
         }
     </script>
