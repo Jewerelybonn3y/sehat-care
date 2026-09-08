@@ -4,34 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SehatCare - Layanan Kesehatan Profesional</title>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS v4 Browser CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body id="page-body" class="bg-slate-50 text-slate-800 antialiased transition-colors duration-500">
+<body id="page-body" class="bg-slate-50 text-slate-800 antialiased transition-colors duration-500 min-h-screen flex flex-col justify-between">
 
     <!-- Navbar -->
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <header class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-slate-100">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-teal-600/20">S</div>
                 <span class="text-xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">SehatCare</span>
             </div>
-            <!-- Tombol Login Admin sengaja disembunyikan/dihapus dari pandangan publik agar aman -->
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 py-8">
+    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
 
         <!-- HERO BANNER SLIDER IMAGE SECTION -->
         <section class="mb-12 relative">
             <div class="overflow-hidden rounded-3xl shadow-xl shadow-teal-900/10 relative h-[250px] md:h-[350px] bg-slate-200">
                 <div id="banner-slider-wrapper" class="flex transition-transform duration-700 ease-in-out h-full w-full">
-                    <!-- Dinamis dari Supabase -->
+                    <!-- Dinamis -->
                 </div>
             </div>
             <!-- Navigasi Slider Dot -->
@@ -64,7 +65,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Alamat Lengkap</label>
-                    <textarea id="alamat" required rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm bg-white" placeholder="Contoh: Jl. Merdeka No. 10, Kota..."></textarea>
+                    <textarea id="alamat" required rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm bg-white" placeholder="Contoh: Jl. Merdeka No. 10, RT 01/RW 02, Kota..."></textarea>
                 </div>
                 <button type="submit" class="w-full py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-teal-600/30 transition cursor-pointer">
                     Pesan Sekarang via WhatsApp
@@ -73,7 +74,12 @@
         </div>
     </main>
 
-    <!-- JavaScript Public Supabase -->
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400 mt-12">
+        &copy; 2026 SehatCare. Seluruh hak cipta dilindungi.
+    </footer>
+
+    <!-- JavaScript Supabase & Public Logic -->
     <script>
         const SUPABASE_URL = "https://owliugdusdvcjuzfyelu.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_4FOxl1CSx0j1K1WkC7xNAA_8dl-M1eZ";
@@ -87,65 +93,64 @@
         let slideInterval;
 
         document.addEventListener("DOMContentLoaded", async () => {
-            await muatDataPublik();
+            await ambilDataDariSupabase();
         });
 
-        async function muatDataPublik() {
+        async function ambilDataDariSupabase() {
             try {
-                // 1. Ambil Background / Settings
-                const { data: setting } = await _supabase.from('settings').select('*').eq('key', 'website_bg').single();
-                if (setting) {
-                    terapkanBackground(setting.type, setting.value);
+                // 1. Ambil Background dari Supabase Settings
+                let { data: hasilSetting } = await _supabase.from('settings').select('*').eq('key', 'website_bg').maybeSingle();
+                if (hasilSetting) {
+                    terapkanBackgroundCustom(hasilSetting.type, hasilSetting.value);
                 }
 
-                // 2. Ambil Layanan
-                const { data: hasilServices } = await _supabase.from('services').select('*');
+                // 2. Ambil data layanan dari Supabase
+                let { data: hasilServices } = await _supabase.from('services').select('*');
                 if (hasilServices && hasilServices.length > 0) {
                     services = hasilServices;
                 }
-                renderServices();
 
-                // 3. Ambil Banners
-                const { data: hasilBanners } = await _supabase.from('banners').select('*');
+                // 3. Ambil data banner dari Supabase
+                let { data: hasilBanners } = await _supabase.from('banners').select('*');
                 if (hasilBanners && hasilBanners.length > 0) {
                     banners = hasilBanners;
                 }
-                renderSlider();
-                mulaiSliderOtomatis();
 
-            } catch (err) {
-                console.error("Gagal memuat data dari Supabase:", err);
+                renderPublic();
+                mulaiSliderOtomatis();
+            } catch (error) {
+                console.error("Gagal memuat dari Supabase:", error);
             }
         }
 
-        function terapkanBackground(type, value) {
+        function terapkanBackgroundCustom(bgType, bgValue) {
             const body = document.getElementById('page-body');
-            if (type === "color") {
-                body.style.backgroundColor = value;
+            if (bgType === "color") {
+                body.style.backgroundColor = bgValue;
                 body.style.backgroundImage = "none";
-            } else if (type === "image") {
-                body.style.backgroundImage = `url('${value}')`;
+            } else if (bgType === "image") {
+                body.style.backgroundImage = `url('${bgValue}')`;
                 body.style.backgroundSize = "cover";
                 body.style.backgroundPosition = "center";
                 body.style.backgroundAttachment = "fixed";
             }
         }
 
-        function renderServices() {
+        function renderPublic() {
             const grid = document.getElementById('public-services-grid');
             const select = document.getElementById('layanan-pilihan');
             grid.innerHTML = '';
             select.innerHTML = '';
 
             if (services.length === 0) {
-                grid.innerHTML = '<p class="text-slate-400 text-sm">Belum ada layanan tersedia.</p>';
+                grid.innerHTML = '<p class="text-slate-400 text-sm">Belum ada layanan yang ditambahkan di panel admin.</p>';
                 return;
             }
 
             services.forEach(s => {
                 const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
                 grid.innerHTML += `
-                    <div class="bg-white/90 backdrop-blur-sm p-6 rounded-3xl border border-slate-100 shadow-lg flex flex-col justify-between hover:border-teal-200 transition">
+                    <div class="bg-white/90 backdrop-blur-sm p-6 rounded-3xl border border-slate-100 shadow-lg shadow-slate-100 flex flex-col justify-between hover:border-teal-200 transition">
                         <div>
                             <h3 class="text-lg font-bold text-slate-900 mb-1">${s.nama}</h3>
                             <p class="text-slate-500 text-sm mb-4">${s.deskripsi}</p>
@@ -160,6 +165,8 @@
                 `;
                 select.innerHTML += `<option value="${s.nama} - ${formattedHarga}">${s.nama} (${formattedHarga})</option>`;
             });
+
+            renderSlider();
         }
 
         function renderSlider() {
@@ -222,7 +229,7 @@
             const layanan = document.getElementById('layanan-pilihan').value;
             const notelp = document.getElementById('notelp').value;
             const alamat = document.getElementById('alamat').value;
-            const nomorAdmin = "6281234567890"; // Ganti nomor WhatsApp Anda
+            const nomorAdmin = "6281234567890"; // Ganti dengan nomor WhatsApp Anda
             
             const pesan = `Halo Admin SehatCare, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Pilihan Layanan:* ${layanan}%0A*No Telepon:* ${notelp}%0A*Alamat Lengkap:* ${alamat}`;
             window.open(`https://wa.me/${nomorAdmin}?text=${pesan}`, '_blank');
