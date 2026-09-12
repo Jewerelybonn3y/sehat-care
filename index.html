@@ -3,13 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SehatCare - Layanan Kesehatan Profesional</title>
+    <title>Klinix - Layanan Kesehatan Profesional</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%23139c8c'/%3E%3Cpath d='M3 21 H12 L15.5 12 L20.5 30 L24 21 H30' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='33' cy='21' r='3' fill='white'/%3E%3C/svg%3E">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* Slider lebih halus: gunakan easing custom + hardware acceleration */
+        #banner-slider-wrapper {
+            transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            will-change: transform;
+            touch-action: pan-y;
+        }
+        #banner-slider-wrapper.no-transition {
+            transition: none;
+        }
+        #banner-slider-wrapper img {
+            -webkit-user-drag: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body id="page-body" class="bg-slate-50 text-slate-800 antialiased transition-colors duration-500 min-h-screen flex flex-col justify-between">
@@ -18,8 +33,13 @@
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
-                <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-teal-600/20">S</div>
-                <span class="text-xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">SehatCare</span>
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-teal-600/30 bg-gradient-to-br from-teal-500 to-emerald-600 p-1.5">
+                    <svg viewBox="0 0 40 40" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 21 H12 L15.5 12 L20.5 30 L24 21 H30" fill="none" stroke="white" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="33" cy="21" r="3" fill="white"/>
+                    </svg>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">Klinix</span>
             </div>
         </div>
     </header>
@@ -30,8 +50,8 @@
         <!-- HERO BANNER SLIDER IMAGE SECTION (AUTO-ADJUST HP & PC) -->
         <section class="mb-12 relative">
             <!-- Aspek Rasio: 16/9 di HP, 21/9 di Tablet, dan h-auto/max-h-[380px] di PC -->
-            <div class="overflow-hidden rounded-2xl md:rounded-3xl shadow-xl shadow-teal-900/10 relative aspect-[16/9] sm:aspect-[21/9] md:h-[350px] lg:h-[380px] w-full bg-slate-200">
-                <div id="banner-slider-wrapper" class="flex transition-transform duration-700 ease-in-out h-full w-full">
+            <div id="banner-slider-container" class="overflow-hidden rounded-2xl md:rounded-3xl shadow-xl shadow-teal-900/10 relative aspect-[16/9] sm:aspect-[21/9] md:h-[350px] lg:h-[380px] w-full bg-slate-200">
+                <div id="banner-slider-wrapper" class="flex h-full w-full">
                     <div class="min-w-full h-full flex items-center justify-center text-slate-400 text-sm">
                         Memuat banner...
                     </div>
@@ -69,6 +89,10 @@
                     <label class="block text-sm font-medium text-slate-700 mb-1">Alamat Lengkap</label>
                     <textarea id="alamat" required rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm bg-white" placeholder="Contoh: Jl. Merdeka No. 10, RT 01/RW 02, Kota..."></textarea>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Keterangan Tambahan <span class="text-slate-400 font-normal">(opsional)</span></label>
+                    <textarea id="keterangan" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm bg-white" placeholder="Contoh: Mohon datang setelah jam 4 sore / ada riwayat alergi tertentu, dsb."></textarea>
+                </div>
                 <button type="submit" class="w-full py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-teal-600/30 transition cursor-pointer">
                     Pesan Sekarang via WhatsApp
                 </button>
@@ -78,7 +102,7 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400 mt-12">
-        &copy; 2026 SehatCare. Seluruh hak cipta dilindungi.
+        &copy; 2026 Klinix. Seluruh hak cipta dilindungi.
     </footer>
 
     <!-- JavaScript Public -->
@@ -100,27 +124,45 @@
             { id: 2, image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80" }
         ];
 
+        // Fallback jika tabel 'settings' belum punya baris admin_whatsapp
+        const DEFAULT_ADMIN_WHATSAPP = "6281326352850";
+
         let services = [];
         let banners = [];
         let currentSlide = 0;
         let slideInterval;
+        let nomorAdminWhatsApp = DEFAULT_ADMIN_WHATSAPP;
+
+        // Variabel untuk swipe/drag slider
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragDeltaX = 0;
 
         document.addEventListener("DOMContentLoaded", () => {
             ambilDataDariSupabase();
+            setupSliderInteraction();
         });
 
         async function ambilDataDariSupabase() {
             try {
-                const [reqServices, reqBanners, reqSetting] = await Promise.all([
+                const [reqServices, reqBanners, reqSetting, reqAdminWA] = await Promise.all([
                     _supabase.from('services').select('*'),
                     _supabase.from('banners').select('*'),
-                    _supabase.from('settings').select('*').eq('key', 'website_bg').maybeSingle()
+                    _supabase.from('settings').select('*').eq('key', 'website_bg').maybeSingle(),
+                    _supabase.from('settings').select('*').eq('key', 'admin_whatsapp').maybeSingle()
                 ]);
 
                 if (reqSetting.data) {
                     terapkanBackgroundCloud(reqSetting.data.type, reqSetting.data.value);
                 } else {
                     terapkanBackgroundLocal();
+                }
+
+                // Ambil nomor WhatsApp admin dari database, fallback ke default kalau belum diatur
+                if (reqAdminWA.data && reqAdminWA.data.value) {
+                    nomorAdminWhatsApp = reqAdminWA.data.value;
+                } else {
+                    nomorAdminWhatsApp = DEFAULT_ADMIN_WHATSAPP;
                 }
 
                 if (!reqServices.error && reqServices.data && reqServices.data.length > 0) {
@@ -142,6 +184,7 @@
                 console.error("Gagal memuat data dari Supabase:", err);
                 services = defaultServices;
                 banners = defaultBanners;
+                nomorAdminWhatsApp = DEFAULT_ADMIN_WHATSAPP;
                 terapkanBackgroundLocal();
                 renderServices();
                 renderSlider();
@@ -192,21 +235,21 @@
                         </div>
                     </div>
                 `;
-                select.innerHTML += `<option value="${s.nama} - ${formattedHarga}">${s.nama} (${formattedHarga})</option>`;
+                select.innerHTML += `<option value="${s.nama}">${s.nama} (${formattedHarga})</option>`;
             });
         }
 
         function renderSlider() {
             const wrapper = document.getElementById('banner-slider-wrapper');
             const dotsContainer = document.getElementById('slider-dots');
-            
+
             wrapper.innerHTML = '';
             dotsContainer.innerHTML = '';
 
             banners.forEach((b, index) => {
                 wrapper.innerHTML += `
                     <div class="min-w-full h-full flex-shrink-0">
-                        <img src="${b.image}" class="w-full h-full object-cover object-center" alt="Banner SehatCare" loading="lazy">
+                        <img src="${b.image}" class="w-full h-full object-cover object-center" alt="Banner Klinix" loading="lazy" draggable="false">
                     </div>
                 `;
 
@@ -216,13 +259,39 @@
                 `;
             });
 
-            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            goToSlide(currentSlide, false);
+        }
+
+        // Pindah slide dengan opsi mematikan transisi (dipakai saat render ulang data)
+        function goToSlide(index, animate = true) {
+            const wrapper = document.getElementById('banner-slider-wrapper');
+            if (!animate) {
+                wrapper.classList.add('no-transition');
+            }
+            wrapper.style.transform = `translateX(-${index * 100}%)`;
+            if (!animate) {
+                // Paksa reflow lalu aktifkan lagi transisinya untuk slide berikutnya
+                void wrapper.offsetHeight;
+                wrapper.classList.remove('no-transition');
+            }
         }
 
         function setSlide(index) {
             currentSlide = index;
-            renderSlider();
+            updateDots();
+            goToSlide(currentSlide, true);
             resetSliderOtomatis();
+        }
+
+        function updateDots() {
+            const dotsContainer = document.getElementById('slider-dots');
+            [...dotsContainer.children].forEach((dot, i) => {
+                if (i === currentSlide) {
+                    dot.className = 'h-2 rounded-full transition-all duration-300 cursor-pointer bg-teal-600 w-6';
+                } else {
+                    dot.className = 'h-2 rounded-full transition-all duration-300 cursor-pointer bg-slate-300 w-2';
+                }
+            });
         }
 
         function mulaiSliderOtomatis() {
@@ -230,7 +299,8 @@
             slideInterval = setInterval(() => {
                 if (banners.length > 0) {
                     currentSlide = (currentSlide + 1) % banners.length;
-                    renderSlider();
+                    updateDots();
+                    goToSlide(currentSlide, true);
                 }
             }, 4000);
         }
@@ -240,23 +310,79 @@
             mulaiSliderOtomatis();
         }
 
+        // Dukungan swipe (sentuh di HP) + drag mouse di PC agar transisi terasa lebih halus/natural
+        function setupSliderInteraction() {
+            const container = document.getElementById('banner-slider-container');
+            const wrapper = document.getElementById('banner-slider-wrapper');
+
+            // Jeda slider otomatis saat kursor berada di atas banner
+            container.addEventListener('mouseenter', () => clearInterval(slideInterval));
+            container.addEventListener('mouseleave', () => mulaiSliderOtomatis());
+
+            const onDragStart = (clientX) => {
+                isDragging = true;
+                dragStartX = clientX;
+                dragDeltaX = 0;
+                clearInterval(slideInterval);
+                wrapper.classList.add('no-transition');
+            };
+
+            const onDragMove = (clientX) => {
+                if (!isDragging) return;
+                dragDeltaX = clientX - dragStartX;
+                const containerWidth = container.offsetWidth;
+                const percentDelta = (dragDeltaX / containerWidth) * 100;
+                wrapper.style.transform = `translateX(calc(-${currentSlide * 100}% + ${percentDelta}%))`;
+            };
+
+            const onDragEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                wrapper.classList.remove('no-transition');
+
+                const containerWidth = container.offsetWidth;
+                const threshold = containerWidth * 0.15; // geser minimal 15% lebar untuk pindah slide
+
+                if (dragDeltaX < -threshold && currentSlide < banners.length - 1) {
+                    currentSlide += 1;
+                } else if (dragDeltaX > threshold && currentSlide > 0) {
+                    currentSlide -= 1;
+                }
+                updateDots();
+                goToSlide(currentSlide, true);
+                mulaiSliderOtomatis();
+            };
+
+            // Touch events (HP/tablet)
+            container.addEventListener('touchstart', (e) => onDragStart(e.touches[0].clientX), { passive: true });
+            container.addEventListener('touchmove', (e) => onDragMove(e.touches[0].clientX), { passive: true });
+            container.addEventListener('touchend', onDragEnd);
+
+            // Mouse drag (opsional, untuk pengalaman di PC)
+            container.addEventListener('mousedown', (e) => onDragStart(e.clientX));
+            container.addEventListener('mousemove', (e) => onDragMove(e.clientX));
+            window.addEventListener('mouseup', onDragEnd);
+        }
+
         function pilihCepat(nama) {
             const s = services.find(item => item.nama === nama);
             if (!s) return;
-            const formattedHarga = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(s.harga);
-            document.getElementById('layanan-pilihan').value = `${s.nama} - ${formattedHarga}`;
+            document.getElementById('layanan-pilihan').value = s.nama;
             window.scrollTo({ top: document.getElementById('booking-form').offsetTop - 100, behavior: 'smooth' });
         }
 
         // FUNGSI PEMESANAN & SINKRONISASI DATABASE ORDERS
         async function KirimKeWhatsApp(event) {
             event.preventDefault();
-            
+
             const nama = document.getElementById('nama').value;
-            const layanan = document.getElementById('layanan-pilihan').value;
+            const layanan = document.getElementById('layanan-pilihan').value; // hanya nama layanan, tanpa harga
             const notelp = document.getElementById('notelp').value;
             const alamat = document.getElementById('alamat').value;
-            const nomorAdmin = "6281326352850"; // Ganti dengan nomor WhatsApp Anda
+            const keterangan = document.getElementById('keterangan').value.trim();
+
+            // Nomor admin sekarang diambil dari database (tabel settings, key: admin_whatsapp)
+            const nomorAdmin = nomorAdminWhatsApp;
 
             // 1. Simpan Data Order Otomatis ke Database Supabase
             try {
@@ -266,6 +392,7 @@
                         jenis_layanan: layanan,
                         no_whatsapp: notelp,
                         alamat: alamat,
+                        catatan: keterangan,
                         status: 'Pending'
                     }
                 ]);
@@ -273,8 +400,11 @@
                 console.error("Gagal menyimpan riwayat order ke database:", err);
             }
 
-            // 2. Teruskan Pasien ke WhatsApp
-            const pesan = `Halo Admin SehatCare, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Pilihan Layanan:* ${layanan}%0A*No Telepon:* ${notelp}%0A*Alamat Lengkap:* ${alamat}`;
+            // 2. Teruskan Pasien ke WhatsApp (tanpa harga, hanya identitas, layanan, alamat, dan keterangan bila diisi)
+            let pesan = `Halo Admin Klinix, saya ingin memesan layanan kesehatan.%0A%0A*Nama Pasien:* ${nama}%0A*Layanan yang Dibutuhkan:* ${layanan}%0A*No Telepon:* ${notelp}%0A*Alamat Lengkap:* ${alamat}`;
+            if (keterangan) {
+                pesan += `%0A*Keterangan Tambahan:* ${keterangan}`;
+            }
             window.open(`https://wa.me/${nomorAdmin}?text=${pesan}`, '_blank');
         }
     </script>

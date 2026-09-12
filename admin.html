@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - SehatCare</title>
+    <title>Admin Dashboard - Klinix</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%23139c8c'/%3E%3Cpath d='M3 21 H12 L15.5 12 L20.5 30 L24 21 H30' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='33' cy='21' r='3' fill='white'/%3E%3C/svg%3E">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,8 +17,13 @@
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
-                <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">⚡</div>
-                <span class="text-xl font-bold text-slate-900">Panel Admin SehatCare</span>
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-teal-600/30 bg-gradient-to-br from-teal-500 to-emerald-600 p-1.5">
+                    <svg viewBox="0 0 40 40" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 21 H12 L15.5 12 L20.5 30 L24 21 H30" fill="none" stroke="white" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="33" cy="21" r="3" fill="white"/>
+                    </svg>
+                </div>
+                <span class="text-xl font-bold text-slate-900">Panel Admin Klinix</span>
             </div>
             <a href="index.html" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-teal-50 text-teal-700 hover:bg-teal-100">
                 Lihat Website Utama ↗
@@ -27,6 +33,56 @@
 
     <!-- Content Admin -->
     <main class="max-w-6xl mx-auto px-4 py-8 space-y-12">
+
+        <!-- KELOLA PESANAN MASUK (ORDERS) -->
+        <section class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-100">
+            <div class="mb-6 flex items-center justify-between flex-wrap gap-3">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Pesanan Masuk</h2>
+                    <p class="text-slate-500 text-sm">Daftar pemesanan dari pelanggan melalui website utama.</p>
+                </div>
+                <button onclick="renderOrders()" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">
+                    ⟳ Muat Ulang
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-100 text-slate-400 text-xs font-semibold uppercase">
+                            <th class="py-3 px-3">Pasien</th>
+                            <th class="py-3 px-3">Layanan</th>
+                            <th class="py-3 px-3">No. WhatsApp</th>
+                            <th class="py-3 px-3">Alamat</th>
+                            <th class="py-3 px-3">Keterangan</th>
+                            <th class="py-3 px-3">Status</th>
+                            <th class="py-3 px-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-orders-table" class="divide-y divide-slate-100 text-sm align-top">
+                        <!-- Dinamis -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- KELOLA NOMOR WHATSAPP ADMIN -->
+        <section class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-100">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-slate-900">Nomor WhatsApp Admin</h2>
+                <p class="text-slate-500 text-sm">Pesanan dari website utama akan diteruskan otomatis ke nomor ini via WhatsApp.</p>
+            </div>
+
+            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 max-w-md space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor WhatsApp (format 62xxxxxxxxxx, tanpa spasi/tanda +)</label>
+                    <input type="text" id="admin-whatsapp-number" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm" placeholder="Contoh: 6281234567890">
+                </div>
+                <button onclick="simpanNomorWhatsapp()" class="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl text-sm transition cursor-pointer">
+                    Simpan Nomor WhatsApp
+                </button>
+            </div>
+        </section>
 
         <!-- KELOLA TAMPILAN BACKGROUND / WALLPAPER -->
         <section class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-100">
@@ -169,6 +225,8 @@
             { id: 2, image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80" }
         ];
 
+        const STATUS_OPTIONS = ["Pending", "Dikonfirmasi", "Selesai", "Dibatalkan"];
+
         document.addEventListener("DOMContentLoaded", () => {
             inisialisasiDataAwal();
         });
@@ -190,7 +248,11 @@
                 }
             }
 
+            // Muat nomor WhatsApp admin yang tersimpan (jika ada)
+            await muatNomorWhatsapp();
+
             renderAdmin();
+            renderOrders();
         }
 
         async function renderAdmin() {
@@ -237,6 +299,99 @@
             }
         }
 
+        // ==== PESANAN MASUK (ORDERS) ====
+        async function renderOrders() {
+            const oTable = document.getElementById('admin-orders-table');
+            oTable.innerHTML = '<tr><td colspan="7" class="py-3 px-3 text-slate-400 text-xs">Memuat pesanan...</td></tr>';
+
+            const { data: orders, error } = await _supabase
+                .from('orders')
+                .select('*')
+                .order('id', { ascending: false });
+
+            if (error) {
+                oTable.innerHTML = `<tr><td colspan="7" class="py-3 px-3 text-rose-500 text-xs">Gagal memuat pesanan: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!orders || orders.length === 0) {
+                oTable.innerHTML = '<tr><td colspan="7" class="py-3 px-3 text-slate-400 text-xs">Belum ada pesanan masuk.</td></tr>';
+                return;
+            }
+
+            oTable.innerHTML = '';
+            orders.forEach(o => {
+                const statusColor = o.status === 'Selesai' ? 'bg-emerald-50 text-emerald-700'
+                    : o.status === 'Dibatalkan' ? 'bg-rose-50 text-rose-700'
+                    : o.status === 'Dikonfirmasi' ? 'bg-blue-50 text-blue-700'
+                    : 'bg-amber-50 text-amber-700';
+
+                const statusOptionsHtml = STATUS_OPTIONS.map(s =>
+                    `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`
+                ).join('');
+
+                oTable.innerHTML += `
+                    <tr>
+                        <td class="py-3 px-3 font-semibold text-slate-900">${o.nama_pasien || '-'}</td>
+                        <td class="py-3 px-3">${o.jenis_layanan || '-'}</td>
+                        <td class="py-3 px-3">${o.no_whatsapp || '-'}</td>
+                        <td class="py-3 px-3 max-w-[180px]">${o.alamat || '-'}</td>
+                        <td class="py-3 px-3 max-w-[180px] text-slate-500">${o.catatan ? o.catatan : '<span class="text-slate-300">-</span>'}</td>
+                        <td class="py-3 px-3">
+                            <select onchange="ubahStatusOrder(${o.id}, this.value)" class="text-xs font-semibold rounded-lg px-2 py-1.5 border-0 ${statusColor} cursor-pointer">
+                                ${statusOptionsHtml}
+                            </select>
+                        </td>
+                        <td class="py-3 px-3">
+                            <button onclick="hapusOrder(${o.id})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold bg-rose-50 px-2.5 py-1.5 rounded-lg transition cursor-pointer">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function ubahStatusOrder(id, statusBaru) {
+            const { error } = await _supabase.from('orders').update({ status: statusBaru }).eq('id', id);
+            if (error) {
+                alert("Gagal memperbarui status: " + error.message);
+                renderOrders();
+            }
+        }
+
+        async function hapusOrder(id) {
+            if (confirm('Hapus data pesanan ini?')) {
+                const { error } = await _supabase.from('orders').delete().eq('id', id);
+                if (error) {
+                    alert("Gagal menghapus pesanan: " + error.message);
+                } else {
+                    renderOrders();
+                }
+            }
+        }
+
+        // ==== NOMOR WHATSAPP ADMIN ====
+        async function muatNomorWhatsapp() {
+            const { data } = await _supabase.from('settings').select('*').eq('key', 'admin_whatsapp').maybeSingle();
+            if (data && data.value) {
+                document.getElementById('admin-whatsapp-number').value = data.value;
+            }
+        }
+
+        async function simpanNomorWhatsapp() {
+            const nomor = document.getElementById('admin-whatsapp-number').value.trim();
+            if (!nomor) {
+                alert('Masukkan nomor WhatsApp terlebih dahulu.');
+                return;
+            }
+            const { error } = await _supabase.from('settings').upsert({ key: 'admin_whatsapp', type: 'text', value: nomor });
+            if (error) {
+                alert("Gagal menyimpan nomor WhatsApp: " + error.message);
+            } else {
+                alert('Nomor WhatsApp admin berhasil disimpan!');
+            }
+        }
+
+        // ==== LAYANAN ====
         async function tambahLayanan(e) {
             e.preventDefault();
             const nama = document.getElementById('admin-nama').value;
@@ -264,18 +419,19 @@
             }
         }
 
+        // ==== BANNER ====
         function tambahBannerGambar(e) {
             e.preventDefault();
             const formElement = e.target;
             const fileInput = document.getElementById('banner-file');
             const file = fileInput.files[0];
-            
+
             if (file) {
                 const reader = new FileReader();
                 reader.onload = async function(event) {
                     const base64Image = event.target.result;
                     const { error } = await _supabase.from('banners').insert([{ id: Date.now(), image: base64Image }]);
-                    
+
                     if (error) {
                         alert("Gagal mengunggah banner: " + error.message);
                     } else {
@@ -304,6 +460,7 @@
             }
         }
 
+        // ==== BACKGROUND / WALLPAPER ====
         async function simpanWarnaBg() {
             const warna = document.getElementById('admin-bg-color').value;
             localStorage.setItem('sehatcare_bg_type', 'color');
@@ -321,7 +478,7 @@
             const formElement = e.target;
             const fileInput = document.getElementById('wallpaper-file');
             const file = fileInput.files[0];
-            
+
             if (file) {
                 const reader = new FileReader();
                 reader.onload = async function(event) {
