@@ -25,9 +25,14 @@
                 </div>
                 <span class="text-xl font-bold text-slate-900">Panel Admin Klinix</span>
             </div>
-            <a href="index.html" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-teal-50 text-teal-700 hover:bg-teal-100">
-                Lihat Website Utama ↗
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="index.html" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-teal-50 text-teal-700 hover:bg-teal-100">
+                    Lihat Website Utama ↗
+                </a>
+                <button onclick="logoutAdmin()" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-rose-50 text-rose-600 hover:bg-rose-100 cursor-pointer">
+                    Keluar
+                </button>
+            </div>
         </div>
     </header>
 
@@ -228,8 +233,31 @@
         const STATUS_OPTIONS = ["Pending", "Dikonfirmasi", "Selesai", "Dibatalkan"];
 
         document.addEventListener("DOMContentLoaded", () => {
-            inisialisasiDataAwal();
+            cekSesiLoginLaluInisialisasi();
         });
+
+        // Wajibkan login sebelum panel admin bisa diakses/dipakai
+        async function cekSesiLoginLaluInisialisasi() {
+            const { data } = await _supabase.auth.getSession();
+            if (!data.session) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            // Jaga-jaga: kalau sesi berakhir (misal token kedaluwarsa) saat sedang membuka panel, lempar ke login
+            _supabase.auth.onAuthStateChange((event, session) => {
+                if (!session) {
+                    window.location.href = "login.html";
+                }
+            });
+
+            inisialisasiDataAwal();
+        }
+
+        async function logoutAdmin() {
+            await _supabase.auth.signOut();
+            window.location.href = "login.html";
+        }
 
         async function inisialisasiDataAwal() {
             // Cek dan isi data awal Layanan di Supabase jika kosong
